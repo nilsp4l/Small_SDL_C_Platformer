@@ -1,6 +1,10 @@
 #include "SDL2/SDL.h"
+#include "../Headers/Control.h"
 
-void handle_input(SDL_Event *event, int *up, int *down, int *right, int *left, int *running)
+
+
+
+void handle_input(SDL_Event *event, Controller* controller, int *running)
 {
     while (SDL_PollEvent(event))
     {
@@ -13,16 +17,16 @@ void handle_input(SDL_Event *event, int *up, int *down, int *right, int *left, i
             switch (event->key.keysym.scancode)
             {
             case SDL_SCANCODE_W:
-                *up = 1;
+                controller->up = 1;
                 break;
             case SDL_SCANCODE_A:
-                *left = 1;
+                controller->left = 1;
                 break;
             case SDL_SCANCODE_S:
-                *down = 1;
+                controller->down = 1;
                 break;
             case SDL_SCANCODE_D:
-                *right = 1;
+                controller->right = 1;
                 break;
             default:
                 break;
@@ -33,16 +37,16 @@ void handle_input(SDL_Event *event, int *up, int *down, int *right, int *left, i
             switch (event->key.keysym.scancode)
             {
             case SDL_SCANCODE_W:
-                *up = 0;
+                controller->up = 0;
                 break;
             case SDL_SCANCODE_A:
-                *left = 0;
+                controller->left = 0;
                 break;
             case SDL_SCANCODE_S:
-                *down = 0;
+                controller->down = 0;
                 break;
             case SDL_SCANCODE_D:
-                *right = 0;
+                controller->right = 0;
                 break;
             default:
                 break;
