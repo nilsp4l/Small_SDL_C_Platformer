@@ -14,6 +14,6 @@ struct gameboard
 
 typedef struct gameboard Gameboard;
 
-Level* init_level1();
+Level init_level1(SDL_Surface *plat_surf, SDL_Renderer* renderer);
 
 #endif

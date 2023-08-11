@@ -20,7 +20,7 @@ struct game
 
 typedef struct game Game;
 
-#define SPEED 4
+
 
 // define surface positions inside the surface map
 #define SIZE_SURFACE_MAP (5)
@@ -40,5 +40,11 @@ int run_game();
 int initialize_surface_map(SDL_Surface **surface_map);
 
 int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Texture **texture_map);
+
+void render_player(SDL_Renderer* renderer, Player* player);
+
+void render_level(SDL_Renderer* renderer, Level* level);
+
+void render(Game* game);
 
 #endif

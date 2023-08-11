@@ -1,11 +1,11 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
+#include "SDL2/SDL.h"
 
-
-struct platform 
+struct platform
 {
-    int x;
-    int y;
+    SDL_Rect *rect;
+    SDL_Texture *texture;
     int length;
 };
 

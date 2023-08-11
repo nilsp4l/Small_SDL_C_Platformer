@@ -1,5 +1,29 @@
 #include "../Headers/Game.h"
 
+
+void render_player(SDL_Renderer* renderer, Player* player)
+{
+    SDL_RenderCopy(renderer, player->player_texture_map[player->current_texture], NULL, player->rect);
+}
+
+void render_level(SDL_Renderer* renderer, Level* level)
+{
+    for(size_t i = 0; i < level->platforms_size; ++i)
+    {
+        SDL_RenderCopy(renderer, level->platforms[i].texture, NULL, level->platforms[i].rect);
+    }
+}
+
+void render(Game* game)
+{
+    SDL_RenderClear(game->renderer);
+    render_level(game->renderer, &game->gameboard->levels[game->gameboard->current_level]);
+    render_player(game->renderer, game->gameboard->player);
+    
+    SDL_RenderPresent(game->renderer);
+}
+
+
 int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Texture **player_texture_map)
 {
     if (!player)
@@ -28,7 +52,6 @@ int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Tex
 
     player->dx = 0;
     player->dy = 0;
-    player->current_texture = player->player_texture_map[PLAYER_RIGHT_DOWN_TEX];
     player->rect = player_rect;
 
     player->rect->w = 64;
@@ -36,6 +59,16 @@ int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Tex
     player->rect->x = 50;
     player->rect->y = 50;
     return 0;
+}
+
+
+void destroy_player(Player* player)
+{
+    for(size_t i = 0; i < SIZE_PLAYER_TEXTURE_MAP; ++i)
+    {
+        SDL_DestroyTexture(player->player_texture_map[i]);
+    }
+
 }
 
 int initialize_surface_map(SDL_Surface **surface_map)
@@ -121,15 +154,13 @@ int run_game()
 
     if (initialize_game_tech(&game))
     {
-        fprintf(stderr, "Error initializing game %s\n", SDL_GetError());
+        fprintf(stderr, "Error initializing game\n");
         SDL_Quit();
         return 1;
     }
 
     game.surface_map = surface_map;
-    SDL_Texture *player_right_down = SDL_CreateTextureFromSurface(game.renderer, surface_map[PLAYER_RIGHT_DOWN_SURF]);
-
-    SDL_Texture *player_left_down = SDL_CreateTextureFromSurface(game.renderer, surface_map[PLAYER_LEFT_DOWN_SURF]);
+    
     SDL_Texture *player_texture_map[SIZE_PLAYER_TEXTURE_MAP];
     Player player;
 
@@ -145,62 +176,36 @@ int run_game()
 
     game.gameboard = &gameboard;
 
-    Level level1 = {NULL, 0};
+    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], game.renderer)};
+    gameboard.levels = &levels; 
+    gameboard.current_level = 0;
 
     game.running = 1;
 
     Controller controller = {0, 0, 0, 0};
 
-    int dx = 0;
-    int dy = 0;
-    SDL_Texture *current_player_texture = player_right_down;
 
+    int timer_player_up_down = 0;
+
+    //game loop
     while (game.running)
     {
 
         SDL_Event event;
         handle_input(&event, &controller, &game.running);
+        move_player(&player, &controller);
+        choose_player_texture(&player, &timer_player_up_down);
+        
 
-        dx = 0;
-        dy = 0;
-        if (controller.up && !controller.down)
-        {
-            dy = -SPEED;
-        }
-        if (controller.down && !controller.up)
-        {
-            dy = SPEED;
-        }
-        if (controller.left && !controller.right)
-        {
-            player.direction = 1;
-            dx = -SPEED;
-        }
-        if (controller.right && !controller.left)
-        {
-            player.direction = 0;
-            dx = SPEED;
-        }
-
-        player.x += dx;
-        player.y += dy;
-
-        game.gameboard->player->rect->x = player.x;
-        game.gameboard->player->rect->y = player.y;
-
-        current_player_texture = player.direction ? player_left_down : player_right_down;
-
-        SDL_RenderClear(game.renderer);
-        SDL_RenderCopy(game.renderer, current_player_texture, NULL, &player_rec);
-        SDL_RenderPresent(game.renderer);
+        render(&game);
         SDL_Delay(1000 / 60);
     }
 
-    SDL_DestroyTexture(player_right_down);
-    SDL_DestroyTexture(player_left_down);
-
+    
+    destroy_player(&player);
     SDL_DestroyRenderer(game.renderer);
     SDL_DestroyWindow(game.window);
+    
     SDL_Quit();
     return 0;
 }

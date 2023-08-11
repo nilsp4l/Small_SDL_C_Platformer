@@ -34,7 +34,7 @@ typedef struct player Player;
 
 
 
- 
+void choose_player_texture(Player* player, int *timer);
 
 
 
