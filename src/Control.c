@@ -1,34 +1,6 @@
 #include "SDL2/SDL.h"
 #include "../Headers/Control.h"
 
-void move_player(Player* player, Controller *controller)
-{
-        player->dx = 0;
-        player->dy = 0;
-        if (controller->up && !controller->down)
-        {
-            player->dy = -SPEED;
-        }
-        if (controller->down && !controller->up)
-        {
-            player->dy = SPEED;
-        }
-        if (controller->left && !controller->right)
-        {
-            player->direction = 1;
-            player->dx = -SPEED;
-        }
-        if (controller->right && !controller->left)
-        {
-            player->direction = 0;
-            player->dx = SPEED;
-        }
-
-        player->rect->x += player->dx;
-        player->rect->y += player->dy;
-        
-}
-
 
 void handle_input(SDL_Event *event, Controller* controller, int *running)
 {

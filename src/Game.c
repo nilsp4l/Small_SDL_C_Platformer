@@ -24,6 +24,7 @@ void render(Game* game)
 }
 
 
+
 int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Texture **player_texture_map)
 {
     if (!player)
@@ -54,10 +55,11 @@ int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Tex
     player->dy = 0;
     player->rect = player_rect;
 
-    player->rect->w = 64;
-    player->rect->h = 64;
+    player->rect->w = PLAYER_WIDTH;
+    player->rect->h = PLAYER_HEIGHT;
     player->rect->x = 50;
     player->rect->y = 50;
+    player->on_ground = 1;
     return 0;
 }
 
@@ -192,8 +194,14 @@ int run_game()
     {
 
         SDL_Event event;
+        
         handle_input(&event, &controller, &game.running);
+        player.dx = 0;
+        player.dy = 0;
+
+        fall(&player, &game.gameboard->levels[game.gameboard->current_level]);
         move_player(&player, &controller);
+        
         choose_player_texture(&player, &timer_player_up_down);
         
 

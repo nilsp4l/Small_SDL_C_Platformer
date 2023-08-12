@@ -16,6 +16,6 @@ typedef struct controller Controller;
 
 void handle_input(SDL_Event *event, Controller *controller, int *running);
 
-void move_player(Player* player, Controller *controller);
+
 
 #endif

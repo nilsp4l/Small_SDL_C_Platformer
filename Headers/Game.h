@@ -6,6 +6,7 @@
 #include "SDL2/SDL_image.h"
 #include <stdio.h>
 
+#include "Movement.h"
 #include "Gameboard.h"
 #include "Control.h"
 
