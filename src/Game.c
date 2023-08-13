@@ -10,7 +10,11 @@ void render_level(SDL_Renderer* renderer, Level* level)
 {
     for(size_t i = 0; i < level->platforms_size; ++i)
     {
-        SDL_RenderCopy(renderer, level->platforms[i].texture, NULL, level->platforms[i].rect);
+        if(level->platforms[i].rect && level->platforms[i].texture)
+        {
+            SDL_RenderCopy(renderer, level->platforms[i].texture, NULL, level->platforms[i].rect);
+        }
+        
     }
 }
 
@@ -50,15 +54,16 @@ int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Tex
             return 1;
         }
     }
-
+    player->direction = 0;
+    player->jump_progress = 0;
     player->dx = 0;
     player->dy = 0;
     player->rect = player_rect;
 
     player->rect->w = PLAYER_WIDTH;
     player->rect->h = PLAYER_HEIGHT;
-    player->rect->x = 50;
-    player->rect->y = 50;
+    player->rect->x = PLAYER_X_START;
+    player->rect->y = PLAYER_Y_START;
     player->on_ground = 1;
     return 0;
 }
@@ -89,7 +94,7 @@ int initialize_surface_map(SDL_Surface **surface_map)
     surface_map[PLAYER_RIGHT_DOWN_SURF] = IMG_Load("Ressources/Player/PlayerRight.png");
     surface_map[PLAYER_RIGHT_UP_SURF] = IMG_Load("Ressources/Player/PlayerRightUp.png");
     surface_map[PLAYER_LEFT_DOWN_SURF] = IMG_Load("Ressources/Player/PlayerLeft.png");
-    surface_map[PLAYER_LEFT_UP_SURF] = IMG_Load("Ressources/Player/PlayerLeft.png");
+    surface_map[PLAYER_LEFT_UP_SURF] = IMG_Load("Ressources/Player/PlayerLeftUp.png");
     surface_map[PLATFORM_SURF] = IMG_Load("Ressources/Assets/Platform.png");
 
     // check if every surface is initialized correctly
@@ -181,35 +186,38 @@ int run_game()
     Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], game.renderer)};
     gameboard.levels = &levels; 
     gameboard.current_level = 0;
-
+    
     game.running = 1;
 
-    Controller controller = {0, 0, 0, 0};
+    Controller controller = {0, 0, 0, 0, 0};
 
 
     int timer_player_up_down = 0;
 
+    
+
     //game loop
     while (game.running)
     {
-
+        ++timer_player_up_down;
+        
         SDL_Event event;
         
         handle_input(&event, &controller, &game.running);
         player.dx = 0;
         player.dy = 0;
 
-        fall(&player, &game.gameboard->levels[game.gameboard->current_level]);
-        move_player(&player, &controller);
+        move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
         
         choose_player_texture(&player, &timer_player_up_down);
         
 
         render(&game);
-        SDL_Delay(1000 / 60);
+        SDL_Delay(1000 / 128);
     }
 
-    
+    tear_down_level(&gameboard.levels[gameboard.current_level]);
+    free_surface_map(game.surface_map);
     destroy_player(&player);
     SDL_DestroyRenderer(game.renderer);
     SDL_DestroyWindow(game.window);

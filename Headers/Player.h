@@ -22,6 +22,17 @@
 #define PLAYER_X_OFFSET_LEFT (38)
 #define PLAYER_X_OFFSET_RIGHT (16)
 
+//coordinates of player starting point in the bottom left corner
+
+#define PLAYER_X_START (10)
+#define PLAYER_Y_START (563)
+
+//player max jump in multiples of 8
+#define PLAYER_MAX_JUMP_HEIGHT (20)
+
+#define PLAYER_FLOATING_TIME (10)
+
+
 struct player 
 {
     SDL_Texture** player_texture_map;
@@ -32,7 +43,8 @@ struct player
     int x;
     int y;
     int direction;
-    int on_ground; 
+    int on_ground;
+    int jump_progress; 
 };
 
 typedef struct player Player;

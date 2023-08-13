@@ -1,16 +1,23 @@
 #include "../Headers/Movement.h"
 
-void move_player(Player *player, Controller *controller)
+void move_player(Player *player, Controller *controller, Level *level)
 {
+    player->dx = 0;
+    player->dy = 0;
 
-    if (controller->up && !controller->down)
+    if (controller->jump_interrupted)
     {
-        player->dy = -SPEED * 2;
+        player->jump_progress = 0;
+        controller->jump_interrupted = 0;
     }
-    if (controller->down && !controller->up)
+
+    Platform *platform_player_is_on = check_for_ground(player, level);
+
+    if (controller->up && !controller->down && player->jump_progress <= PLAYER_MAX_JUMP_HEIGHT + PLAYER_FLOATING_TIME && (platform_player_is_on || player->jump_progress > 0))
     {
-        player->dy = SPEED;
+        controller->jump_interrupted = jump(player);
     }
+
     if (controller->left && !controller->right)
     {
         player->direction = 1;
@@ -22,11 +29,20 @@ void move_player(Player *player, Controller *controller)
         player->dx = SPEED;
     }
 
+    do_gravity(player, platform_player_is_on);
+
+    // if player wants to get down on a platform
+    if (controller->down && !controller->up && platform_player_is_on && !platform_player_is_on->is_base)
+    {
+
+        player->dy = SPEED;
+    }
+
     player->rect->x += player->dx;
     player->rect->y += player->dy;
 }
 
-void fall(Player *player, Level *level)
+Platform *check_for_ground(Player *player, Level *level)
 {
     Platform *current = NULL;
     for (size_t i = 0; i < level->platforms_size; ++i)
@@ -38,18 +54,54 @@ void fall(Player *player, Level *level)
         offset is nessecary because the player only moves in multiples of SPEED and could therefore if the
         y - position is not aligned on SPEED not recognize the platform
         */
-        if (current->rect->y + SPEED - 1 >= player->rect->y + 24
-        && current->rect->y - SPEED - 1 <= player->rect->y + 24 
-        // offset of PLAYER_WIDTH is necessary because the origin is in the bottom left corner 
-        && current->rect->x + current->rect->w - PLAYER_X_OFFSET_RIGHT >= player->rect->x 
-        && current->rect->x - PLAYER_X_OFFSET_LEFT <= player->rect->x)
+        if (current->rect && current->rect->y + SPEED - 1 >= player->rect->y + 24 && current->rect->y - SPEED - 1 <= player->rect->y + 24
+            // offset of PLAYER_WIDTH is necessary because the origin is in the bottom left corner
+            && current->rect->x + current->rect->w - PLAYER_X_OFFSET_RIGHT >= player->rect->x && current->rect->x - PLAYER_X_OFFSET_LEFT <= player->rect->x)
         {
-            player->on_ground = 1;
-            player->dy = 0;
-            player->rect->y = current->rect->y - 24;
-            return;
+            return current;
         }
     }
-    player->dy = SPEED;
-    player->on_ground = 0;
+    return NULL;
+}
+
+void do_gravity(Player *player, Platform *platform_player_is_on)
+{
+
+    if (player->jump_progress)
+    {
+        return;
+    }
+
+    if (platform_player_is_on)
+    {
+        player->on_ground = 1;
+        player->dy = 0;
+        player->rect->y = platform_player_is_on->rect->y - 24;
+    }
+    else
+    {
+        player->dy = SPEED;
+        player->on_ground = 0;
+    }
+}
+
+int jump(Player *player)
+{
+        if(player->jump_progress < PLAYER_MAX_JUMP_HEIGHT)
+        {
+            // SPEED * 2 upwards
+            player->dy = -(SPEED << 1);
+            ++player->jump_progress;
+            return 0;
+        }
+        else if(player->jump_progress < PLAYER_MAX_JUMP_HEIGHT + PLAYER_FLOATING_TIME)
+        {
+            ++player->jump_progress;
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+        
 }

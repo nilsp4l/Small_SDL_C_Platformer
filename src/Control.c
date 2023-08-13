@@ -36,6 +36,7 @@ void handle_input(SDL_Event *event, Controller* controller, int *running)
             {
             case SDL_SCANCODE_W:
                 controller->up = 0;
+                controller->jump_interrupted = 1;
                 break;
             case SDL_SCANCODE_A:
                 controller->left = 0;

@@ -10,6 +10,7 @@ struct controller
     int down;
     int right;
     int left;
+    int jump_interrupted;
 };
 
 typedef struct controller Controller;
