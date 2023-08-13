@@ -14,15 +14,19 @@ void handle_input(SDL_Event *event, Controller* controller, int *running)
         case SDL_KEYDOWN:
             switch (event->key.keysym.scancode)
             {
+            case SDL_SCANCODE_UP:
             case SDL_SCANCODE_W:
                 controller->up = 1;
                 break;
+            case SDL_SCANCODE_LEFT:
             case SDL_SCANCODE_A:
                 controller->left = 1;
                 break;
+            case SDL_SCANCODE_DOWN:
             case SDL_SCANCODE_S:
                 controller->down = 1;
                 break;
+            case SDL_SCANCODE_RIGHT:
             case SDL_SCANCODE_D:
                 controller->right = 1;
                 break;
@@ -34,16 +38,20 @@ void handle_input(SDL_Event *event, Controller* controller, int *running)
 
             switch (event->key.keysym.scancode)
             {
+            case SDL_SCANCODE_UP:
             case SDL_SCANCODE_W:
                 controller->up = 0;
                 controller->jump_interrupted = 1;
                 break;
+            case SDL_SCANCODE_LEFT:
             case SDL_SCANCODE_A:
                 controller->left = 0;
                 break;
+            case SDL_SCANCODE_DOWN:
             case SDL_SCANCODE_S:
                 controller->down = 0;
                 break;
+            case SDL_SCANCODE_RIGHT:
             case SDL_SCANCODE_D:
                 controller->right = 0;
                 break;
