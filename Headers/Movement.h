@@ -2,7 +2,8 @@
 #define MOVEMENT_H
 
 #include "Control.h"
-#include "Level.h"
+
+#include "Gameboard.h"
 
 void do_gravity(Player *player, Platform *platform_player_is_on);
 Platform *check_for_ground(Player *player, Level *level);

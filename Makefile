@@ -1,4 +1,4 @@
-CFLAGS= -Wall -Wextra -Wpedantic -std=gnu17 -g 
+CFLAGS= -Wall -Wextra -Wpedantic -std=gnu17 -O3
 SDL_FLAGS = -lSDL2_image -lSDL2 -lSDL2main
 all: main.o
 

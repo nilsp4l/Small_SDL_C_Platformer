@@ -34,7 +34,7 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Renderer *renderer)
 {
     Level to_return;
     to_return.platforms_size = 0; //error case
-    size_t amount_plats = 4;
+    size_t amount_plats = 5;
     to_return.platforms = malloc(amount_plats * sizeof(Platform));
 
     for(size_t i = 0; i < to_return.platforms_size; ++i)
@@ -58,7 +58,8 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Renderer *renderer)
     create_platform(&to_return, rects, renderer, plat_surf, 0, -40, 587, 720, 100, 1);
     create_platform(&to_return, rects, renderer, plat_surf, 1, 40, 480, 200, 100, 0);
     create_platform(&to_return, rects, renderer, plat_surf, 2, 250, 400, 100, 100, 0);
-    create_platform(&to_return, rects, renderer, plat_surf, 3, 30, 320, 30, 100, 0);
+    create_platform(&to_return, rects, renderer, plat_surf, 3, 30, 290, 50, 100, 0);
+    create_platform(&to_return, rects, renderer, plat_surf, 4, 500, 200, 80, 100, 0);
     for(size_t i = 0; i < amount_plats; ++i)
     {
         if(!to_return.platforms->texture)

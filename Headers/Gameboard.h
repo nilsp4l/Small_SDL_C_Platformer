@@ -5,6 +5,12 @@
 #include "Level.h"
 #include <stdlib.h>
 
+#define WINDOW_X_MAX (640)
+#define WINDOW_Y_MAX (640)
+
+#define WINDOW_X_OFFSET_TO_DISAPPEAR (-40)
+
+
 struct gameboard
 {
     Player *player;
@@ -13,6 +19,9 @@ struct gameboard
 };
 
 typedef struct gameboard Gameboard;
+
+
+
 
 void tear_down_level(Level* level);
 

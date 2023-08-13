@@ -19,7 +19,7 @@
 
 //some magic numbers because UI
 #define PLAYER_Y_OFFSET (24)
-#define PLAYER_X_OFFSET_LEFT (38)
+#define PLAYER_X_OFFSET_LEFT (40)
 #define PLAYER_X_OFFSET_RIGHT (16)
 
 //coordinates of player starting point in the bottom left corner
@@ -40,8 +40,6 @@ struct player
     int current_texture;
     int dx;
     int dy;
-    int x;
-    int y;
     int direction;
     int on_ground;
     int jump_progress; 

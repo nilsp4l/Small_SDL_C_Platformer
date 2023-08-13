@@ -22,11 +22,19 @@ void move_player(Player *player, Controller *controller, Level *level)
     {
         player->direction = 1;
         player->dx = -SPEED;
+        if(player->rect->x <= WINDOW_X_OFFSET_TO_DISAPPEAR)
+        {
+            player->rect->x = WINDOW_X_MAX;
+        }
     }
     if (controller->right && !controller->left)
     {
         player->direction = 0;
         player->dx = SPEED;
+        if(player->rect->x >= WINDOW_X_MAX)
+        {
+            player->rect->x = WINDOW_X_OFFSET_TO_DISAPPEAR;
+        }
     }
 
     do_gravity(player, platform_player_is_on);
