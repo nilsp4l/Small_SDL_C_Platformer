@@ -14,6 +14,16 @@ void render_level(SDL_Renderer *renderer, Level *level)
             SDL_RenderCopy(renderer, level->platforms[i].texture, NULL, level->platforms[i].rect);
         }
     }
+
+    for(size_t i = 0; i < level->enemies_size; ++i)
+    {
+        if(level->enemies[i].rect && level->enemies[i].enemy_texture_map[0])
+        {
+           SDL_RenderCopy(renderer, level->enemies[i].enemy_texture_map[0], NULL, level->enemies[i].rect); 
+        }
+    }
+
+
 }
 
 void render(Game *game)
@@ -90,6 +100,8 @@ int initialize_surface_map(SDL_Surface **surface_map)
     surface_map[PLAYER_LEFT_DOWN_SURF] = IMG_Load("Ressources/Player/PlayerLeft.png");
     surface_map[PLAYER_LEFT_UP_SURF] = IMG_Load("Ressources/Player/PlayerLeftUp.png");
     surface_map[PLATFORM_SURF] = IMG_Load("Ressources/Assets/Platform.png");
+    surface_map[ENEMY_NOT_ATTACK] = IMG_Load("Ressources/Enemy/EnemyNotAttack.png");
+    surface_map[ENEMY_ATTACK] = IMG_Load("Ressources/Enemy/EnemyAttack.png");
 
     // check if every surface is initialized correctly
     for (size_t i = 0; i < SIZE_SURFACE_MAP; ++i)
@@ -173,11 +185,14 @@ int run_game()
         return 1;
     }
 
+
+    SDL_Texture *enemy_texture_map[SIZE_ENEMY_TEXTURE_MAP];
+
     Gameboard gameboard = {&player, NULL, 0};
 
     game.gameboard = &gameboard;
-
-    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], game.renderer)};
+    
+    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], surface_map[ENEMY_ATTACK], surface_map[ENEMY_NOT_ATTACK], enemy_texture_map, game.renderer)};
     gameboard.levels = (Level *)&levels;
     gameboard.current_level = 0;
 

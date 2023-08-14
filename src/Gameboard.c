@@ -1,5 +1,6 @@
 #include "../Headers/Gameboard.h"
 
+
 void tear_down_level(Level *level)
 {
     if (!level)
@@ -30,7 +31,7 @@ void create_platform(Level *level, SDL_Rect *rects, SDL_Renderer *renderer, SDL_
     
 }
 
-Level init_level1(SDL_Surface *plat_surf, SDL_Renderer *renderer)
+Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Surface *enemy_not_attack_surf, SDL_Texture** enemy_texture_map, SDL_Renderer *renderer)
 {
     Level to_return;
     to_return.platforms_size = 0; //error case
@@ -70,6 +71,16 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Renderer *renderer)
     }
     
 
+    to_return.enemies = malloc(sizeof(Enemy));
+    to_return.enemies->rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies->enemy_texture_map = enemy_texture_map;
+    to_return.enemies->enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_not_attack_surf);
+    to_return.enemies->enemy_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_attack_surf);
+    to_return.enemies->rect->x = 50;
+    to_return.enemies->rect->y = 100;
+    to_return.enemies->rect->h = 48;
+    to_return.enemies->rect->w = 48;
+    to_return.enemies_size = 1;
     to_return.platforms_size = amount_plats;
 
     return to_return;
