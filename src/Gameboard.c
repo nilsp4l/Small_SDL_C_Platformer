@@ -31,7 +31,7 @@ void create_platform(Level *level, SDL_Rect *rects, SDL_Renderer *renderer, SDL_
     
 }
 
-Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Surface *enemy_not_attack_surf, SDL_Texture** enemy_texture_map, SDL_Renderer *renderer)
+Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Surface *enemy_not_attack_surf, SDL_Texture** enemy_texture_map, SDL_Surface* projectile_surface, SDL_Renderer *renderer)
 {
     Level to_return;
     to_return.platforms_size = 0; //error case
@@ -81,6 +81,20 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
     to_return.enemies->rect->h = 48;
     to_return.enemies->rect->w = 48;
     to_return.enemies_size = 1;
+    to_return.enemies->current_texture = ENEMY_NOT_ATTACK_TEX;
+    to_return.enemies->amount_projectiles = 1;
+    to_return.enemies->projectile_queue = malloc(sizeof(Projectile_Queue));
+    to_return.enemies->projectile_queue->queue = malloc(sizeof(Projectile*));
+    to_return.enemies->projectile_queue->queue[0] = malloc(sizeof(Projectile));
+    to_return.enemies->projectile_queue->queue[0]->rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies->projectile_queue->queue[0]->rect->x = to_return.enemies->rect->x + 16;
+    to_return.enemies->projectile_queue->queue[0]->rect->y = to_return.enemies->rect->y + 23;
+    to_return.enemies->projectile_queue->queue[0]->rect->w = 0;
+    to_return.enemies->projectile_queue->queue[0]->rect->h = 0;
+    to_return.enemies->projectile_queue->queue[0]->ready = 1;
+    to_return.enemies->projectile_queue->queue_size = 1;
+    to_return.enemies->projectile_queue->queue[0]->texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
+    
     to_return.platforms_size = amount_plats;
 
     return to_return;

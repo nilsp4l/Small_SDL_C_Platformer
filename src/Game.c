@@ -15,15 +15,24 @@ void render_level(SDL_Renderer *renderer, Level *level)
         }
     }
 
-    for(size_t i = 0; i < level->enemies_size; ++i)
+    for (size_t i = 0; i < level->enemies_size; ++i)
     {
-        if(level->enemies[i].rect && level->enemies[i].enemy_texture_map[0])
+        if (level->enemies[i].rect && level->enemies[i].enemy_texture_map[0])
         {
-           SDL_RenderCopy(renderer, level->enemies[i].enemy_texture_map[0], NULL, level->enemies[i].rect); 
+            SDL_RenderCopy(renderer, level->enemies[i].enemy_texture_map[level->enemies[i].current_texture], NULL, level->enemies[i].rect);
         }
     }
 
-
+    for (size_t i = 0; i < level->enemies_size; ++i)
+    {
+        for (size_t j = 0; j < level->enemies->amount_projectiles; ++j)
+        {
+            if (level->enemies[i].projectile_queue->queue[j]->rect && level->enemies[i].projectile_queue->queue[j]->rect)
+            {
+                SDL_RenderCopy(renderer, level->enemies[i].projectile_queue->queue[j]->texture, NULL, level->enemies[i].projectile_queue->queue[j]->rect);
+            }
+        }
+    }
 }
 
 void render(Game *game)
@@ -102,6 +111,7 @@ int initialize_surface_map(SDL_Surface **surface_map)
     surface_map[PLATFORM_SURF] = IMG_Load("Ressources/Assets/Platform.png");
     surface_map[ENEMY_NOT_ATTACK] = IMG_Load("Ressources/Enemy/EnemyNotAttack.png");
     surface_map[ENEMY_ATTACK] = IMG_Load("Ressources/Enemy/EnemyAttack.png");
+    surface_map[PROJECTILE] = IMG_Load("Ressources/Enemy/Projectile.png");
 
     // check if every surface is initialized correctly
     for (size_t i = 0; i < SIZE_SURFACE_MAP; ++i)
@@ -185,14 +195,13 @@ int run_game()
         return 1;
     }
 
-
     SDL_Texture *enemy_texture_map[SIZE_ENEMY_TEXTURE_MAP];
 
     Gameboard gameboard = {&player, NULL, 0};
 
     game.gameboard = &gameboard;
-    
-    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], surface_map[ENEMY_ATTACK], surface_map[ENEMY_NOT_ATTACK], enemy_texture_map, game.renderer)};
+
+    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], surface_map[ENEMY_ATTACK], surface_map[ENEMY_NOT_ATTACK], enemy_texture_map, surface_map[PROJECTILE], game.renderer)};
     gameboard.levels = (Level *)&levels;
     gameboard.current_level = 0;
 
@@ -212,7 +221,7 @@ int run_game()
         handle_input(&event, &controller, &game.running);
 
         move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
-
+        let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size, &player);
         choose_player_texture(&player, &timer_player_up_down);
 
         render(&game);

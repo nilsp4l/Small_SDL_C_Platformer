@@ -24,7 +24,7 @@ typedef struct game Game;
 
 
 // define surface positions inside the surface map
-#define SIZE_SURFACE_MAP (7)
+#define SIZE_SURFACE_MAP (8)
 #define PLAYER_RIGHT_DOWN_SURF (0)
 #define PLAYER_RIGHT_UP_SURF (1)
 #define PLAYER_LEFT_DOWN_SURF (2)
@@ -32,6 +32,7 @@ typedef struct game Game;
 #define PLATFORM_SURF (4)
 #define ENEMY_NOT_ATTACK (5) 
 #define ENEMY_ATTACK (6)
+#define PROJECTILE (7)
 
 
 /*
