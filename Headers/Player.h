@@ -27,7 +27,7 @@
 #define PLAYER_Y_START (563)
 
 // player max jump in multiples of 8
-#define PLAYER_MAX_JUMP_HEIGHT (20)
+#define PLAYER_MAX_JUMP_HEIGHT (15)
 
 #define PLAYER_FLOATING_TIME (10)
 

@@ -1,5 +1,39 @@
 #include "../Headers/Gameboard.h"
 
+int check_collision(Player* player, Projectile* projectile)
+{
+    int projectile_x = projectile->rect->x;
+    int projectile_y = projectile->rect->y;
+
+    int player_x = player->rect->x;
+    int player_y = player->rect->y;
+
+
+    if(!projectile->ready && projectile_x >= player_x - 32 && projectile_x <= player_x + PLAYER_WIDTH - 32 && projectile_y <= player_y + PLAYER_HEIGHT - 10 && projectile_y >= player_y + 10)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int check_for_player_dead(Player *player, Level *level)
+{
+    Enemy *enemy = NULL;
+    for (size_t i = 0; i < level->enemies_size; ++i)
+    {
+        enemy = &level->enemies[i];
+        for (size_t j = 0; j < enemy->projectile_clock->clock_size; ++j)
+        {
+            if(check_collision(player, &enemy->projectile_clock->clock[j]))
+            {
+                return 1;
+            }
+            
+        }
+    }
+    return 0;
+}
+
 void tear_down_level(Level *level)
 {
     if (!level)
@@ -28,26 +62,60 @@ void create_platform(Level *level, SDL_Rect *rects, SDL_Renderer *renderer, SDL_
     level->platforms[pos].texture = SDL_CreateTextureFromSurface(renderer, plat_surf);
 }
 
-
+void move_projectile(Projectile *projectile)
+{
+    switch (projectile->direction)
+    {
+    case UP:
+        projectile->rect->y -= projectile->speed;
+        break;
+    case RIGHT:
+        projectile->rect->x += projectile->speed;
+        break;
+    case DOWN:
+        projectile->rect->y += projectile->speed;
+        break;
+    case LEFT:
+        projectile->rect->x -= projectile->speed;
+        break;
+    case UP_RIGHT:
+        projectile->rect->x += projectile->speed;
+        projectile->rect->y -= projectile->speed;
+        break;
+    case UP_LEFT:
+        projectile->rect->x -= projectile->speed;
+        projectile->rect->y -= projectile->speed;
+        break;
+    case BOTTOM_RIGHT:
+        projectile->rect->x += projectile->speed;
+        projectile->rect->y += projectile->speed;
+        break;
+    case BOTTOM_LEFT:
+        projectile->rect->x -= projectile->speed;
+        projectile->rect->y += projectile->speed;
+        break;
+    default:
+        break;
+    }
+}
 
 void move_projectiles(Level *level)
 {
     Projectile *current = NULL;
     for (size_t i = 0; i < level->enemies_size; ++i)
     {
-        for (size_t j = 0; j < level->enemies[i].projectile_queue->queue_size; ++j)
+        for (size_t j = 0; j < level->enemies[i].projectile_clock->clock_size; ++j)
         {
-            current = &level->enemies[i].projectile_queue->queue[j];
+            current = &level->enemies[i].projectile_clock->clock[j];
             // check if ready projectile is out of bounds so it may be resetted for the enemy
-            if (!current->ready && (current->rect->x > WINDOW_X_MAX || current->rect->x < WINDOW_X_OFFSET_TO_DISAPPEAR || current->rect->y > WINDOW_Y_MAX || current->rect->y < 0))
+            if (!current->ready && (current->rect->x > WINDOW_X_MAX || current->rect->x < WINDOW_X_OFFSET_TO_DISAPPEAR || current->rect->y > WINDOW_Y_MAX || current->rect->y < WINDOW_X_OFFSET_TO_DISAPPEAR))
             {
                 current->ready = 1;
             }
 
             else if (!current->ready)
             {
-                current->rect->x += current->speed;
-                current->rect->y += current->speed;
+                move_projectile(current);
             }
         }
     }
@@ -92,47 +160,81 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
         }
     }
 
-    to_return.enemies = malloc(sizeof(Enemy));
-    to_return.enemies->rect = malloc(sizeof(SDL_Rect));
-    to_return.enemies->enemy_texture_map = enemy_texture_map;
-    to_return.enemies->enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_not_attack_surf);
-    to_return.enemies->enemy_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_attack_surf);
-    to_return.enemies->rect->x = 50;
-    to_return.enemies->rect->y = 100;
-    to_return.enemies->rect->h = 48;
-    to_return.enemies->rect->w = 48;
-    to_return.enemies_size = 1;
-    to_return.enemies->current_texture = ENEMY_NOT_ATTACK_TEX;
-    to_return.enemies->amount_projectiles = 2;
-    to_return.enemies->projectile_queue = malloc(sizeof(Projectile_Queue));
-    to_return.enemies->projectile_queue->queue = malloc(2 * sizeof(Projectile));
+    to_return.enemies = malloc(2 * sizeof(Enemy));
+    to_return.enemies[0].rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies[0].enemy_texture_map = enemy_texture_map;
+    to_return.enemies[0].enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_not_attack_surf);
+    to_return.enemies[0].enemy_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_attack_surf);
+    to_return.enemies[0].rect->x = 50;
+    to_return.enemies[0].rect->y = 100;
+    to_return.enemies[0].rect->h = 48;
+    to_return.enemies[0].rect->w = 48;
+    to_return.enemies_size = 2;
+    to_return.enemies[0].current_texture = ENEMY_NOT_ATTACK_TEX;
+    to_return.enemies[0].amount_projectiles = 2;
+    to_return.enemies[0].projectile_clock = malloc(sizeof(Projectile_Clock));
+    to_return.enemies[0].projectile_clock->clock = malloc(2 * sizeof(Projectile));
 
-    to_return.enemies->projectile_queue->queue[0].rect = malloc(sizeof(SDL_Rect));
-    to_return.enemies->projectile_queue->queue[0].rect->x = to_return.enemies->rect->x + 16;
-    to_return.enemies->projectile_queue->queue[0].rect->y = to_return.enemies->rect->y + 23;
-    to_return.enemies->projectile_queue->queue[0].rect->w = 0;
-    to_return.enemies->projectile_queue->queue[0].rect->h = 0;
-    to_return.enemies->projectile_queue->queue[0].ready = 1;
-    to_return.enemies->projectile_queue->queue_size = 2;
-    to_return.enemies->projectile_queue->queue[0].speed = 2;
-    to_return.enemies->projectile_queue->queue[0].texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
-    
+    to_return.enemies[0].projectile_clock->clock[0].rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies[0].projectile_clock->clock[0].rect->x = to_return.enemies[0].rect->x + 16;
+    to_return.enemies[0].projectile_clock->clock[0].rect->y = to_return.enemies[0].rect->y + 23;
+    to_return.enemies[0].projectile_clock->clock[0].rect->w = 0;
+    to_return.enemies[0].projectile_clock->clock[0].rect->h = 0;
+    to_return.enemies[0].projectile_clock->clock[0].ready = 1;
+    to_return.enemies[0].projectile_clock->clock_size = 2;
+    to_return.enemies[0].projectile_clock->hand = 0;
+    to_return.enemies[0].projectile_clock->clock[0].speed = 2;
+    to_return.enemies[0].projectile_clock->clock[0].texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
+    to_return.enemies[0].projectile_clock->clock[0].direction = BOTTOM_RIGHT;
 
-    to_return.enemies->projectile_queue->queue[1].rect = malloc(sizeof(SDL_Rect));
-    to_return.enemies->projectile_queue->queue[1].rect->x = to_return.enemies->rect->x + 16;
-    to_return.enemies->projectile_queue->queue[1].rect->y = to_return.enemies->rect->y + 23;
-    to_return.enemies->projectile_queue->queue[1].rect->w = 0;
-    to_return.enemies->projectile_queue->queue[1].rect->h = 0;
-    to_return.enemies->projectile_queue->queue[1].ready = 1;
-    to_return.enemies->projectile_queue->queue[1].speed = 2;
-    
-    
-    to_return.enemies->projectile_queue->queue[1].texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
+    to_return.enemies[0].timer = 0;
+
+    to_return.enemies[0].projectile_clock->clock[1].rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies[0].projectile_clock->clock[1].rect->x = to_return.enemies[0].rect->x + 16;
+    to_return.enemies[0].projectile_clock->clock[1].rect->y = to_return.enemies[0].rect->y + 23;
+    to_return.enemies[0].projectile_clock->clock[1].rect->w = 0;
+    to_return.enemies[0].projectile_clock->clock[1].rect->h = 0;
+    to_return.enemies[0].projectile_clock->clock[1].ready = 1;
+    to_return.enemies[0].projectile_clock->clock[1].speed = 2;
+    to_return.enemies[0].projectile_clock->clock[1].direction = DOWN;
+    to_return.enemies[0].projectile_clock->clock[1].texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
+
+    to_return.enemies[0].current_projectile = malloc(sizeof(Projectile *));
+    *to_return.enemies[0].current_projectile = NULL;
 
 
-    to_return.enemies->current_projectile = malloc(sizeof(Projectile*));
-    *to_return.enemies->current_projectile = NULL;
-    
+
+
+   
+    to_return.enemies[1].rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies[1].enemy_texture_map = enemy_texture_map;
+    to_return.enemies[1].enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_not_attack_surf);
+    to_return.enemies[1].enemy_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_attack_surf);
+    to_return.enemies[1].rect->x = 100;
+    to_return.enemies[1].rect->y = 580;
+    to_return.enemies[1].rect->h = 48;
+    to_return.enemies[1].rect->w = 48;
+    to_return.enemies[1].current_texture = ENEMY_NOT_ATTACK_TEX;
+    to_return.enemies[1].amount_projectiles = 1;
+    to_return.enemies[1].projectile_clock = malloc(sizeof(Projectile_Clock));
+    to_return.enemies[1].projectile_clock->clock = malloc(sizeof(Projectile));
+
+    to_return.enemies[1].projectile_clock->clock[0].rect = malloc(sizeof(SDL_Rect));
+    to_return.enemies[1].projectile_clock->clock[0].rect->x = to_return.enemies[0].rect->x + 40;
+    to_return.enemies[1].projectile_clock->clock[0].rect->y = to_return.enemies[0].rect->y + 23;
+    to_return.enemies[1].projectile_clock->clock[0].rect->w = 0;
+    to_return.enemies[1].projectile_clock->clock[0].rect->h = 0;
+    to_return.enemies[1].projectile_clock->clock[0].ready = 1;
+    to_return.enemies[1].projectile_clock->clock_size = 1;
+    to_return.enemies[1].projectile_clock->hand = 0;
+    to_return.enemies[1].projectile_clock->clock[0].speed = 0;
+    to_return.enemies[1].projectile_clock->clock[0].texture = SDL_CreateTextureFromSurface(renderer, projectile_surface);
+    to_return.enemies[1].projectile_clock->clock[0].direction = RIGHT;
+
+    to_return.enemies[1].timer = 0;
+    to_return.enemies[1].current_projectile = malloc(sizeof(Projectile *));
+    *to_return.enemies[1].current_projectile = NULL;
+
     to_return.platforms_size = amount_plats;
 
     return to_return;

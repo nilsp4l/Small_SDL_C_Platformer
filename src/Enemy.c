@@ -1,15 +1,15 @@
 #include "../Headers/Enemy.h"
 
-void omega_wiggle(Enemy *enemy)
+void omega_wiggle(SDL_Rect *rect, int timer)
 {
-    if ((enemy->timer & 3) == 0)
+    if ((timer & 3) == 0)
     {
-        enemy->rect->x -= 2;
+        rect->x -= 2;
     }
-    else if ((enemy->timer & 1) == 0)
+    else if ((timer & 1) == 0)
     {
 
-        enemy->rect->x += 2;
+        rect->x += 2;
     }
 }
 
@@ -19,11 +19,7 @@ int start_shooting(Projectile *projectile)
     {
         ++projectile->rect->h;
         ++projectile->rect->w;
-        if (projectile->rect->w & 1)
-        {
-            ++projectile->rect->x;
-            ++projectile->rect->y;
-        }
+        omega_wiggle(projectile->rect, projectile->rect->w);
         return 0;
     }
     else
@@ -35,7 +31,7 @@ int start_shooting(Projectile *projectile)
 
 void update_enemy_projectile(Enemy *enemy)
 {
-    *enemy->current_projectile = serve_first(enemy->projectile_queue);
+    *enemy->current_projectile = use_clock(enemy->projectile_clock);
 
     // no projectile is ready
     if (!*enemy->current_projectile)
@@ -69,9 +65,9 @@ void shoot(Enemy *enemy, Player *player)
     else if (enemy->timer > 100 && enemy->timer <= 200)
     {
         // wiggle the omega
-        omega_wiggle(enemy);
+        omega_wiggle(enemy->rect, enemy->timer);
     }
-    else if (enemy->timer > 200 && enemy->timer <= 250)
+    else if (enemy->timer > 200)
     {
         enemy->current_texture = ENEMY_ATTACK_TEX;
 
@@ -80,10 +76,6 @@ void shoot(Enemy *enemy, Player *player)
             *enemy->current_projectile = NULL;
             enemy->timer = 0;
         }
-    }
-    else
-    {
-        enemy->timer = 0;
     }
 }
 

@@ -1,0 +1,51 @@
+Date : 2023-08-16 22:53:54
+Directory : /home/nils/Documents/Small_SDL_C_Platformer
+Total : 21 files,  868 codes, 28 comments, 207 blanks, all 1103 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C        |          8 |        671 |         16 |        125 |        812 |
+| C++      |         11 |        189 |         12 |         80 |        281 |
+| Makefile |          1 |          7 |          0 |          2 |          9 |
+| Markdown |          1 |          1 |          0 |          0 |          1 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                             | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                |         21 |        868 |         28 |        207 |      1,103 |
+| . (Files)                                                        |          2 |          8 |          0 |          2 |         10 |
+| Headers                                                          |         11 |        189 |         12 |         80 |        281 |
+| src                                                              |          8 |        671 |         16 |        125 |        812 |
++------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                         | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Clock.h      | C++      |         12 |          0 |          8 |         20 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Constants.h  | C++      |         12 |          2 |          3 |         17 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Control.h    | C++      |         15 |          0 |          7 |         22 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Enemy.h      | C++      |         21 |          0 |          6 |         27 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Game.h       | C++      |         26 |          4 |         19 |         49 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Gameboard.h  | C++      |         19 |          0 |          9 |         28 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Level.h      | C++      |         14 |          0 |          4 |         18 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Movement.h   | C++      |          9 |          0 |          4 |         13 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Platform.h   | C++      |         12 |          1 |          3 |         16 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Player.h     | C++      |         33 |          5 |         12 |         50 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Headers/Projectile.h | C++      |         16 |          0 |          5 |         21 |
+| /home/nils/Documents/Small_SDL_C_Platformer/Makefile             | Makefile |          7 |          0 |          2 |          9 |
+| /home/nils/Documents/Small_SDL_C_Platformer/README.md            | Markdown |          1 |          0 |          0 |          1 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Clock.c          | C        |         15 |          1 |          9 |         25 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Control.c        | C        |         63 |          0 |          3 |         66 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Enemy.c          | C        |         74 |          2 |         12 |         88 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Game.c           | C        |        196 |          3 |         45 |        244 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Gameboard.c      | C        |        206 |          1 |         34 |        241 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Movement.c       | C        |         91 |          8 |         16 |        115 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/Player.c         | C        |         21 |          1 |          3 |         25 |
+| /home/nils/Documents/Small_SDL_C_Platformer/src/main.c           | C        |          5 |          0 |          3 |          8 |
+| Total                                                            |          |        868 |         28 |        207 |      1,103 |
++------------------------------------------------------------------+----------+------------+------------+------------+------------+

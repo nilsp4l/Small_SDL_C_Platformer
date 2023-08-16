@@ -1,6 +1,6 @@
 #include "SDL2/SDL.h"
 #include "Player.h"
-#include "Queue.h"
+#include "Clock.h"
 
 #define SIZE_ENEMY_TEXTURE_MAP (2)
 #define ENEMY_NOT_ATTACK_TEX (0)
@@ -11,7 +11,7 @@
 
 struct enemy
 {
-    Projectile_Queue *projectile_queue;
+    Projectile_Clock *projectile_clock;
     SDL_Texture **enemy_texture_map;
     SDL_Rect *rect;
     Projectile **current_projectile;
