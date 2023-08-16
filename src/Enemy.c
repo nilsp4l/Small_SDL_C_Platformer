@@ -48,7 +48,7 @@ void update_enemy_projectile(Enemy *enemy)
     }
 }
 
-void shoot(Enemy *enemy, Player *player)
+void shoot(Enemy *enemy)
 {
 
     if (!*enemy->current_projectile)
@@ -79,10 +79,10 @@ void shoot(Enemy *enemy, Player *player)
     }
 }
 
-void let_enemies_attack(Enemy *enemies, size_t enemies_size, Player *player)
+void let_enemies_attack(Enemy *enemies, size_t enemies_size)
 {
     for (size_t i = 0; i < enemies_size; ++i)
     {
-        shoot(enemies + i, player);
+        shoot(enemies + i);
     }
 }

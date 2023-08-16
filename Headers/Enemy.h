@@ -22,6 +22,6 @@ struct enemy
 
 typedef struct enemy Enemy;
 
-void let_enemies_attack(Enemy *enemies, size_t enemies_size, Player *player);
+void let_enemies_attack(Enemy *enemies, size_t enemies_size);
 
-void shoot(Enemy *enemy, Player *player);
+void shoot(Enemy *enemy);

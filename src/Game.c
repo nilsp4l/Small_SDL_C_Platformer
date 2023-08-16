@@ -25,9 +25,9 @@ void render_level(SDL_Renderer *renderer, Level *level)
 
     for (size_t i = 0; i < level->enemies_size; ++i)
     {
-        for (size_t j = 0; j < level->enemies->amount_projectiles; ++j)
+        for (size_t j = 0; j < level->enemies->projectile_clock->clock_size; ++j)
         {
-            if (level->enemies[i].projectile_clock->clock[j].rect && level->enemies[i].projectile_clock->clock[j].rect)
+            if (level->enemies[i].projectile_clock->clock[j].texture && level->enemies[i].projectile_clock->clock[j].rect)
             {
                 SDL_RenderCopy(renderer, level->enemies[i].projectile_clock->clock[j].texture, NULL, level->enemies[i].projectile_clock->clock[j].rect);
             }
@@ -221,7 +221,7 @@ int run_game()
         handle_input(&event, &controller, &game.running);
 
         move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
-        let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size, &player);
+        let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size);
         move_projectiles(&game.gameboard->levels[game.gameboard->current_level]);
         if(check_for_player_dead(&player, &game.gameboard->levels[game.gameboard->current_level]))
         {

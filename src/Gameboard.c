@@ -160,7 +160,8 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
         }
     }
 
-    to_return.enemies = malloc(2 * sizeof(Enemy));
+    to_return.enemies_size = 1;
+    to_return.enemies = malloc(to_return.enemies_size * sizeof(Enemy));
     to_return.enemies[0].rect = malloc(sizeof(SDL_Rect));
     to_return.enemies[0].enemy_texture_map = enemy_texture_map;
     to_return.enemies[0].enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, enemy_not_attack_surf);
@@ -169,7 +170,7 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
     to_return.enemies[0].rect->y = 100;
     to_return.enemies[0].rect->h = 48;
     to_return.enemies[0].rect->w = 48;
-    to_return.enemies_size = 2;
+    
     to_return.enemies[0].current_texture = ENEMY_NOT_ATTACK_TEX;
     to_return.enemies[0].amount_projectiles = 2;
     to_return.enemies[0].projectile_clock = malloc(sizeof(Projectile_Clock));
@@ -204,7 +205,7 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
 
 
 
-
+    /*
    
     to_return.enemies[1].rect = malloc(sizeof(SDL_Rect));
     to_return.enemies[1].enemy_texture_map = enemy_texture_map;
@@ -234,7 +235,7 @@ Level init_level1(SDL_Surface *plat_surf, SDL_Surface *enemy_attack_surf, SDL_Su
     to_return.enemies[1].timer = 0;
     to_return.enemies[1].current_projectile = malloc(sizeof(Projectile *));
     *to_return.enemies[1].current_projectile = NULL;
-
+    */
     to_return.platforms_size = amount_plats;
 
     return to_return;
