@@ -27,9 +27,9 @@ void render_level(SDL_Renderer *renderer, Level *level)
     {
         for (size_t j = 0; j < level->enemies->amount_projectiles; ++j)
         {
-            if (level->enemies[i].projectile_queue->queue[j]->rect && level->enemies[i].projectile_queue->queue[j]->rect)
+            if (level->enemies[i].projectile_queue->queue[j].rect && level->enemies[i].projectile_queue->queue[j].rect)
             {
-                SDL_RenderCopy(renderer, level->enemies[i].projectile_queue->queue[j]->texture, NULL, level->enemies[i].projectile_queue->queue[j]->rect);
+                SDL_RenderCopy(renderer, level->enemies[i].projectile_queue->queue[j].texture, NULL, level->enemies[i].projectile_queue->queue[j].rect);
             }
         }
     }
@@ -222,6 +222,7 @@ int run_game()
 
         move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
         let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size, &player);
+        move_projectiles(&game.gameboard->levels[game.gameboard->current_level]);
         choose_player_texture(&player, &timer_player_up_down);
 
         render(&game);

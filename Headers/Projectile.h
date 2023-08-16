@@ -14,6 +14,7 @@ struct projectile
     SDL_Rect *rect;
     SDL_Texture *texture;
     int ready;
+    int speed;
 };
 
 typedef struct projectile Projectile;

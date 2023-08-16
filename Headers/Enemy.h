@@ -1,5 +1,3 @@
-
-
 #include "SDL2/SDL.h"
 #include "Player.h"
 #include "Queue.h"
@@ -8,13 +6,17 @@
 #define ENEMY_NOT_ATTACK_TEX (0)
 #define ENEMY_ATTACK_TEX (1)
 
+#define PROJECTILE_SPAWN_OFFSET_X (16)
+#define PROJECTILE_SPANW_OFFSET_Y (23)
+
 struct enemy
 {
-    Projectile_Queue* projectile_queue;
+    Projectile_Queue *projectile_queue;
     SDL_Texture **enemy_texture_map;
     SDL_Rect *rect;
+    Projectile **current_projectile;
+    size_t amount_projectiles;
     int current_texture;
-    int amount_projectiles;
     int timer;
 };
 
