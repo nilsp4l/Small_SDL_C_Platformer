@@ -44,13 +44,13 @@ void tear_down_level(Level *level)
 
     for (size_t i = 0; i < level->platforms_size; ++i)
     {
-        SDL_DestroyTexture(level->platforms[i].texture);
+        // SDL_DestroyTexture(level->platforms[i].texture);
     }
 
     free(level->platforms);
 }
 
-int create_platform(Level *level, SDL_Rect *rects, SDL_Renderer *renderer, SDL_Surface *plat_surf, int pos, int x, int y, int w, int h, int is_base)
+void create_platform(Level *level, SDL_Rect *rects, int pos, int x, int y, int w, int h, int is_base)
 {
     rects[pos].x = x;
     rects[pos].y = y;
@@ -58,20 +58,13 @@ int create_platform(Level *level, SDL_Rect *rects, SDL_Renderer *renderer, SDL_S
     rects[pos].h = h;
     level->platforms[pos].is_base = is_base;
     level->platforms[pos].rect = &rects[pos];
-    level->platforms[pos].texture = SDL_CreateTextureFromSurface(renderer, plat_surf);
 
-    if(!level->platforms[pos].texture)
-    {
-        return 1;
-    }
-
-    return 0;
 }
 
-int create_projectile(Projectile *projectiles, int index, SDL_Renderer *renderer, SDL_Surface **surface_map, Direction direction, int speed)
+int create_projectile(Projectile *projectiles, int index, Direction direction, int speed)
 {
     projectiles[index].rect = malloc(sizeof(SDL_Rect));
-    if(!projectiles[index].rect)
+    if (!projectiles[index].rect)
     {
         return 1;
     }
@@ -83,17 +76,13 @@ int create_projectile(Projectile *projectiles, int index, SDL_Renderer *renderer
     projectiles[index].ready = 1;
     projectiles[index].speed = speed;
 
-    projectiles[index].texture = SDL_CreateTextureFromSurface(renderer, surface_map[PROJECTILE]);
-    if(!projectiles[index].texture)
-    {
-        return 1;
-    }
+    
 
     projectiles[index].direction = direction;
     return 0;
 }
 
-int create_enemy(Enemy *enemies, int index, size_t enemies_size, SDL_Texture **enemy_texture_map, SDL_Renderer *renderer, SDL_Surface **surface_map, Projectile *projectiles, int x, int y, size_t amount_projectiles)
+int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *projectiles, int x, int y, size_t amount_projectiles)
 {
     if (index >= enemies_size)
     {
@@ -101,33 +90,17 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, SDL_Texture **e
         return 1;
     }
     enemies[index].rect = NULL;
-    enemies[index].enemy_texture_map = NULL;
     enemies[index].rect = malloc(sizeof(SDL_Rect));
+
+    if (!enemies[index].rect)
+    {
+        puts(SDL_GetError());
+        return 1;
+    }
+
+   
+
     
-    if(!enemies[index].rect)
-    {
-        puts(SDL_GetError());
-        return 1;
-    }
-
-    enemies[index].enemy_texture_map = enemy_texture_map;
-    enemies[index].enemy_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[ENEMY_NOT_ATTACK]);
-    
-    if(!enemies[index].enemy_texture_map[ENEMY_NOT_ATTACK])
-    {
-        puts(SDL_GetError());
-        return 1;
-    }
-
-    //sometimes a segfault happens here
-    enemies[index].enemy_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[ENEMY_ATTACK]);
-
-    if(!enemies[index].enemy_texture_map[ENEMY_ATTACK])
-    {
-        puts(SDL_GetError());
-        return 1;
-    }
-
     enemies[index].rect->x = x;
     enemies[index].rect->y = y;
     enemies[index].rect->h = 48;
@@ -135,17 +108,16 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, SDL_Texture **e
 
     enemies[index].current_texture = ENEMY_NOT_ATTACK_TEX;
     enemies[index].projectile_clock = malloc(sizeof(Projectile_Clock));
-    
-    if(!enemies[index].projectile_clock)
+
+    if (!enemies[index].projectile_clock)
     {
         puts(SDL_GetError());
         return 1;
     }
 
-
     enemies[index].projectile_clock->clock = malloc(amount_projectiles * sizeof(Projectile));
 
-    if(!enemies[index].projectile_clock->clock)
+    if (!enemies[index].projectile_clock->clock)
     {
         puts(SDL_GetError());
         return 1;
@@ -156,7 +128,7 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, SDL_Texture **e
     enemies[index].projectile_clock->clock = projectiles;
     enemies[index].current_projectile = malloc(sizeof(Projectile *));
 
-    if(!enemies[index].current_projectile)
+    if (!enemies[index].current_projectile)
     {
         puts(SDL_GetError());
         return 1;
@@ -235,10 +207,10 @@ void move_projectiles(Level *level)
     }
 }
 
-Level init_level1(SDL_Surface **surface_map, SDL_Texture **enemy_texture_map, SDL_Renderer *renderer)
+Level init_level1()
 {
     int check = 0;
-    
+
     Level to_return;
     to_return.platforms_size = 0; // error case
     size_t amount_plats = 5;
@@ -247,7 +219,6 @@ Level init_level1(SDL_Surface **surface_map, SDL_Texture **enemy_texture_map, SD
     for (size_t i = 0; i < to_return.platforms_size; ++i)
     {
         to_return.platforms[i].rect = NULL;
-        to_return.platforms[i].texture = NULL;
     }
 
     if (!to_return.platforms)
@@ -262,56 +233,48 @@ Level init_level1(SDL_Surface **surface_map, SDL_Texture **enemy_texture_map, SD
         return to_return;
     }
 
-    check |= create_platform(&to_return, rects, renderer, surface_map[PLATFORM_SURF], 0, -40, 587, 720, 100, 1);
-    check |= create_platform(&to_return, rects, renderer, surface_map[PLATFORM_SURF], 1, 40, 480, 200, 100, 0);
-    check |= create_platform(&to_return, rects, renderer, surface_map[PLATFORM_SURF], 2, 250, 400, 100, 100, 0);
-    check |= create_platform(&to_return, rects, renderer, surface_map[PLATFORM_SURF], 3, 30, 350, 50, 100, 0);
-    check |= create_platform(&to_return, rects, renderer, surface_map[PLATFORM_SURF], 4, 500, 290, 80, 100, 0);
-    if(check)
-    {
-        puts("platforms");
-        return to_return;
-    }
-
+    create_platform(&to_return, rects, 0, -40, 587, 720, 100, 1);
+    create_platform(&to_return, rects, 1, 40, 480, 200, 100, 0);
+    create_platform(&to_return, rects, 2, 250, 400, 100, 100, 0);
+    create_platform(&to_return, rects, 3, 30, 350, 50, 100, 0);
+    create_platform(&to_return, rects, 4, 500, 290, 80, 100, 0);
     
 
     to_return.enemies_size = 2;
     to_return.enemies = malloc(to_return.enemies_size * sizeof(Enemy));
     size_t amount_proj1 = 2;
     Projectile *enemy_1_projectiles = malloc(amount_proj1 * sizeof(Projectile));
-    check |= create_projectile(enemy_1_projectiles, 0, renderer, surface_map, DOWN, 2);
-    check |= create_projectile(enemy_1_projectiles, 1, renderer, surface_map, BOTTOM_RIGHT, 2);
-    if(check)
+    check |= create_projectile(enemy_1_projectiles, 0, DOWN, 2);
+    check |= create_projectile(enemy_1_projectiles, 1, BOTTOM_RIGHT, 2);
+    if (check)
     {
         puts("projectiles 1");
         return to_return;
     }
 
-   
-    if(create_enemy(to_return.enemies, 0, to_return.enemies_size, enemy_texture_map, renderer, surface_map, enemy_1_projectiles, 50, 100, amount_proj1))
+    if (create_enemy(to_return.enemies, 0, to_return.enemies_size, enemy_1_projectiles, 50, 100, amount_proj1))
     {
         puts("enemy 1");
         return to_return;
-       
     }
 
     size_t amount_proj2 = 1;
     Projectile *enemy_2_projectiles = malloc(amount_proj2 * sizeof(Projectile));
-    check |= create_projectile(enemy_2_projectiles, 0, renderer, surface_map, BOTTOM_LEFT, 4);
-    if(check)
+    check |= create_projectile(enemy_2_projectiles, 0, BOTTOM_LEFT, 4);
+    if (check)
     {
         puts("projectile 2");
         return to_return;
     }
 
-    check |= create_enemy(to_return.enemies, 1, to_return.enemies_size, enemy_texture_map, renderer, surface_map, enemy_2_projectiles, 580, 100, amount_proj2);
-
-    if(check)
+    if(create_enemy(to_return.enemies, 1, to_return.enemies_size, enemy_2_projectiles, 580, 100, amount_proj2))
     {
-        puts("enemy 2");
+        return to_return;
     }
+
     
-    if(check)
+
+    if (check)
     {
         puts("Error initializing level 1");
     }

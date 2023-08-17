@@ -37,13 +37,13 @@ int initialize_game_tech(Game *game);
 int run_game();
 int initialize_surface_map(SDL_Surface **surface_map);
 
-int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Texture **texture_map);
+int initialize_player(Player *player, SDL_Rect *player_rect);
 
-void render_player(SDL_Renderer* renderer, Player* player);
+void render_player(SDL_Renderer* renderer, Player* player, SDL_Texture** env_texture_map);
 
-void render_level(SDL_Renderer* renderer, Level* level);
+void render_level(SDL_Renderer* renderer, Level* level, SDL_Texture** env_texture_map);
 
 
-void render(Game* game);
+void render(Game* game, SDL_Texture** env_texture_map);
 
 #endif

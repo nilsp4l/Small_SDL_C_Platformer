@@ -1,25 +1,25 @@
 #include "../Headers/Game.h"
 
-void render_player(SDL_Renderer *renderer, Player *player)
+void render_player(SDL_Renderer *renderer, Player* player, SDL_Texture** env_texture_map)
 {
-    SDL_RenderCopy(renderer, player->player_texture_map[player->current_texture], NULL, player->rect);
+    SDL_RenderCopy(renderer, env_texture_map[player->current_texture], NULL, player->rect);
 }
 
-void render_level(SDL_Renderer *renderer, Level *level)
+void render_level(SDL_Renderer *renderer, Level *level, SDL_Texture **env_texture_map)
 {
     for (size_t i = 0; i < level->platforms_size; ++i)
     {
-        if (level->platforms[i].rect && level->platforms[i].texture)
+        if (level->platforms[i].rect)
         {
-            SDL_RenderCopy(renderer, level->platforms[i].texture, NULL, level->platforms[i].rect);
+            SDL_RenderCopy(renderer, env_texture_map[PLATFORM_TEX], NULL, level->platforms[i].rect);
         }
     }
 
     for (size_t i = 0; i < level->enemies_size; ++i)
     {
-        if (level->enemies[i].rect && level->enemies[i].enemy_texture_map[0])
+        if (level->enemies[i].rect)
         {
-            SDL_RenderCopy(renderer, level->enemies[i].enemy_texture_map[level->enemies[i].current_texture], NULL, level->enemies[i].rect);
+            SDL_RenderCopy(renderer, env_texture_map[level->enemies[i].current_texture], NULL, level->enemies[i].rect);
         }
     }
 
@@ -27,48 +27,55 @@ void render_level(SDL_Renderer *renderer, Level *level)
     {
         for (size_t j = 0; j < level->enemies[i].projectile_clock->clock_size; ++j)
         {
-            if (level->enemies[i].projectile_clock->clock[j].texture && level->enemies[i].projectile_clock->clock[j].rect)
+            if (level->enemies[i].projectile_clock->clock[j].rect)
             {
-                SDL_RenderCopy(renderer, level->enemies[i].projectile_clock->clock[j].texture, NULL, level->enemies[i].projectile_clock->clock[j].rect);
+                SDL_RenderCopy(renderer, env_texture_map[PROJECTILE_TEX], NULL, level->enemies[i].projectile_clock->clock[j].rect);
             }
         }
     }
 }
 
-void render(Game *game)
+void render(Game *game, SDL_Texture **env_texture_map)
 {
     SDL_RenderClear(game->renderer);
-    render_level(game->renderer, &game->gameboard->levels[game->gameboard->current_level]);
-    render_player(game->renderer, game->gameboard->player);
+    render_level(game->renderer, &game->gameboard->levels[game->gameboard->current_level], env_texture_map);
+    render_player(game->renderer, game->gameboard->player, env_texture_map);
 
     SDL_RenderPresent(game->renderer);
 }
 
-int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Texture **player_texture_map)
+int initialize_env_texture_map(SDL_Renderer *renderer, SDL_Texture **env_texture_map, SDL_Surface **surface_map)
+{
+    env_texture_map[PROJECTILE_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PROJECTILE]);
+    env_texture_map[PLATFORM_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLATFORM_SURF]);
+    env_texture_map[ENEMY_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[ENEMY_ATTACK]);
+    env_texture_map[ENEMY_NOT_ATTACK_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[ENEMY_NOT_ATTACK]);
+    env_texture_map[PLAYER_RIGHT_UP_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_RIGHT_UP_SURF]);
+    env_texture_map[PLAYER_RIGHT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_RIGHT_DOWN_SURF]);
+    env_texture_map[PLAYER_LEFT_UP_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_UP_SURF]);
+    env_texture_map[PLAYER_LEFT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_DOWN_SURF]);
+
+    for(size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
+    {
+        if(!*env_texture_map)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int initialize_player(Player *player, SDL_Rect *player_rect)
 {
     if (!player)
     {
         return 1;
     }
-    player->player_texture_map = player_texture_map;
+    
 
-    for (size_t i = 0; i < SIZE_PLAYER_TEXTURE_MAP; ++i)
-    {
-        player->player_texture_map[i] = NULL;
-    }
+    
 
-    player->player_texture_map[PLAYER_RIGHT_UP_TEX] = SDL_CreateTextureFromSurface(game->renderer, game->surface_map[PLAYER_RIGHT_UP_SURF]);
-    player->player_texture_map[PLAYER_RIGHT_DOWN_TEX] = SDL_CreateTextureFromSurface(game->renderer, game->surface_map[PLAYER_RIGHT_DOWN_SURF]);
-    player->player_texture_map[PLAYER_LEFT_UP_TEX] = SDL_CreateTextureFromSurface(game->renderer, game->surface_map[PLAYER_LEFT_UP_SURF]);
-    player->player_texture_map[PLAYER_LEFT_DOWN_TEX] = SDL_CreateTextureFromSurface(game->renderer, game->surface_map[PLAYER_LEFT_DOWN_SURF]);
-
-    for (size_t i = 0; i < SIZE_PLAYER_TEXTURE_MAP; ++i)
-    {
-        if (!player->player_texture_map[i])
-        {
-            return 1;
-        }
-    }
+    
     player->direction = 0;
     player->jump_progress = 0;
     player->dx = 0;
@@ -83,13 +90,6 @@ int initialize_player(Player *player, Game *game, SDL_Rect *player_rect, SDL_Tex
     return 0;
 }
 
-void destroy_player(Player *player)
-{
-    for (size_t i = 0; i < SIZE_PLAYER_TEXTURE_MAP; ++i)
-    {
-        SDL_DestroyTexture(player->player_texture_map[i]);
-    }
-}
 
 int initialize_surface_map(SDL_Surface **surface_map)
 {
@@ -184,24 +184,28 @@ int run_game()
 
     game.surface_map = surface_map;
 
-    SDL_Texture *player_texture_map[SIZE_PLAYER_TEXTURE_MAP];
     Player player;
 
     SDL_Rect player_rec;
 
-    if (initialize_player(&player, &game, &player_rec, player_texture_map))
+    SDL_Texture *env_texture_map[SIZE_ENV_TEXTURE_MAP];
+
+    if (initialize_env_texture_map(game.renderer, env_texture_map, surface_map))
+    {
+        return 1;
+    }
+
+    if (initialize_player(&player, &player_rec))
     {
         fprintf(stderr, "Error initializing player\n");
         return 1;
     }
 
-    SDL_Texture *enemy_texture_map[SIZE_ENEMY_TEXTURE_MAP];
-
     Gameboard gameboard = {&player, NULL, 0};
 
     game.gameboard = &gameboard;
 
-    Level levels[1] = {init_level1(surface_map, enemy_texture_map, game.renderer)};
+    Level levels[1] = {init_level1()};
     gameboard.levels = (Level *)&levels;
     gameboard.current_level = 0;
 
@@ -223,20 +227,19 @@ int run_game()
         move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
         let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size);
         move_projectiles(&game.gameboard->levels[game.gameboard->current_level]);
-        if(check_for_player_dead(&player, &game.gameboard->levels[game.gameboard->current_level]))
+        if (check_for_player_dead(&player, &game.gameboard->levels[game.gameboard->current_level]))
         {
             player.rect->x = PLAYER_X_START;
             player.rect->y = PLAYER_Y_START;
         }
         choose_player_texture(&player, &timer_player_up_down);
 
-        render(&game);
+        render(&game, env_texture_map);
         SDL_Delay(1000 / 128);
     }
 
     tear_down_level(&gameboard.levels[gameboard.current_level]);
     free_surface_map(game.surface_map);
-    destroy_player(&player);
     SDL_DestroyRenderer(game.renderer);
     SDL_DestroyWindow(game.window);
 

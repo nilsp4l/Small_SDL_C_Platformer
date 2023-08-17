@@ -1,10 +1,8 @@
 #include "SDL2/SDL.h"
 #include "Player.h"
 #include "Clock.h"
+#include "Constants.h"
 
-#define SIZE_ENEMY_TEXTURE_MAP (2)
-#define ENEMY_NOT_ATTACK_TEX (0)
-#define ENEMY_ATTACK_TEX (1)
 
 #define PROJECTILE_SPAWN_OFFSET_X (16)
 #define PROJECTILE_SPANW_OFFSET_Y (23)
@@ -12,7 +10,6 @@
 struct enemy
 {
     Projectile_Clock *projectile_clock;
-    SDL_Texture **enemy_texture_map;
     SDL_Rect *rect;
     Projectile **current_projectile;
     int current_texture;

@@ -15,3 +15,14 @@
 #define WINDOW_Y_MAX (640)
 
 #define WINDOW_X_OFFSET_TO_DISAPPEAR (-40)
+
+// positions inside env_texture_map
+#define SIZE_ENV_TEXTURE_MAP (8)
+#define PLATFORM_TEX (0)
+#define PROJECTILE_TEX (1)
+#define ENEMY_NOT_ATTACK_TEX (2)
+#define ENEMY_ATTACK_TEX (3)
+#define PLAYER_RIGHT_DOWN_TEX (4)
+#define PLAYER_RIGHT_UP_TEX (5)
+#define PLAYER_LEFT_DOWN_TEX (6)
+#define PLAYER_LEFT_UP_TEX (7)

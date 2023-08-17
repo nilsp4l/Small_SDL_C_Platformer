@@ -20,7 +20,7 @@ typedef struct gameboard Gameboard;
 
 void tear_down_level(Level *level);
 
-Level init_level1(SDL_Surface **surface_map , SDL_Texture **enemy_texture_map, SDL_Renderer *renderer);
+Level init_level1();
 void move_projectiles(Level *level);
 int check_collision(Player* player, Projectile* projectile);
 int check_for_player_dead(Player *player, Level *level);

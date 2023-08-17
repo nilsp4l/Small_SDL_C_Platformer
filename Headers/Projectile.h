@@ -12,7 +12,6 @@ typedef enum direction Direction;
 struct projectile
 {
     SDL_Rect *rect;
-    SDL_Texture *texture;
     int ready;
     int speed;
     Direction direction;
