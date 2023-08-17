@@ -15,7 +15,6 @@ struct enemy
     SDL_Texture **enemy_texture_map;
     SDL_Rect *rect;
     Projectile **current_projectile;
-    size_t amount_projectiles;
     int current_texture;
     int timer;
 };

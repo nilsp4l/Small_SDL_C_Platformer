@@ -25,7 +25,7 @@ void render_level(SDL_Renderer *renderer, Level *level)
 
     for (size_t i = 0; i < level->enemies_size; ++i)
     {
-        for (size_t j = 0; j < level->enemies->projectile_clock->clock_size; ++j)
+        for (size_t j = 0; j < level->enemies[i].projectile_clock->clock_size; ++j)
         {
             if (level->enemies[i].projectile_clock->clock[j].texture && level->enemies[i].projectile_clock->clock[j].rect)
             {
@@ -201,7 +201,7 @@ int run_game()
 
     game.gameboard = &gameboard;
 
-    Level levels[1] = {init_level1(surface_map[PLATFORM_SURF], surface_map[ENEMY_ATTACK], surface_map[ENEMY_NOT_ATTACK], enemy_texture_map, surface_map[PROJECTILE], game.renderer)};
+    Level levels[1] = {init_level1(surface_map, enemy_texture_map, game.renderer)};
     gameboard.levels = (Level *)&levels;
     gameboard.current_level = 0;
 
