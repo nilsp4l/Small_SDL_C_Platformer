@@ -86,7 +86,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
 {
     if (index >= enemies_size)
     {
-        puts(SDL_GetError());
         return 1;
     }
     enemies[index].rect = NULL;
@@ -94,7 +93,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
 
     if (!enemies[index].rect)
     {
-        puts(SDL_GetError());
         return 1;
     }
 
@@ -111,7 +109,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
 
     if (!enemies[index].projectile_clock)
     {
-        puts(SDL_GetError());
         return 1;
     }
 
@@ -119,7 +116,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
 
     if (!enemies[index].projectile_clock->clock)
     {
-        puts(SDL_GetError());
         return 1;
     }
 
@@ -130,7 +126,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
 
     if (!enemies[index].current_projectile)
     {
-        puts(SDL_GetError());
         return 1;
     }
 
