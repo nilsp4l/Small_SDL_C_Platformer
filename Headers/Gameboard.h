@@ -22,7 +22,7 @@ void tear_down_level(Level *level);
 
 Level init_level1();
 void move_projectiles(Level *level);
-int check_collision(Player* player, Projectile* projectile);
+void check_coin_collection(Player *player, Level *level);
 int check_for_player_dead(Player *player, Level *level);
 
 #endif

@@ -1,19 +1,25 @@
 #include "../Headers/Gameboard.h"
 
-int check_collision(Player *player, Projectile *projectile)
+int check_collision(SDL_Rect *rect1, Player *player)
 {
-    int projectile_x = projectile->rect->x;
-    int projectile_y = projectile->rect->y;
-
-    int player_x = player->rect->x;
-    int player_y = player->rect->y;
-
-    if (!projectile->ready && projectile_x >= player_x + 16 && projectile_x <= player_x + PLAYER_WIDTH - 32 && projectile_y <= player_y + PLAYER_HEIGHT - 10 && projectile_y >= player_y + 10)
+    if (rect1->x >= player->rect->x + 16 && rect1->x <= player->rect->x + PLAYER_WIDTH - 32 && rect1->y <= player->rect->y + PLAYER_HEIGHT - 10 && rect1->y >= player->rect->y + 10)
     {
         return 1;
     }
-
     return 0;
+}
+
+void check_coin_collection(Player *player, Level *level)
+{
+    Coin *current = NULL;
+    for (size_t i = 0; i < level->coins_size; ++i)
+    {
+        current = &level->coins[i];
+        if(!current->collected && check_collision(current->rect, player))
+        {
+            current->collected = 1;
+        }
+    }
 }
 
 int check_for_player_dead(Player *player, Level *level)
@@ -24,7 +30,7 @@ int check_for_player_dead(Player *player, Level *level)
         enemy = &level->enemies[i];
         for (size_t j = 0; j < enemy->projectile_clock->clock_size; ++j)
         {
-            if (check_collision(player, &enemy->projectile_clock->clock[j]))
+            if (!level->enemies->projectile_clock->clock[j].ready && check_collision(level->enemies->projectile_clock->clock[j].rect, player))
             {
                 return 1;
             }
@@ -42,11 +48,6 @@ void tear_down_level(Level *level)
 
     free(level->platforms[0].rect);
 
-    for (size_t i = 0; i < level->platforms_size; ++i)
-    {
-        // SDL_DestroyTexture(level->platforms[i].texture);
-    }
-
     free(level->platforms);
 }
 
@@ -58,7 +59,6 @@ void create_platform(Level *level, SDL_Rect *rects, int pos, int x, int y, int w
     rects[pos].h = h;
     level->platforms[pos].is_base = is_base;
     level->platforms[pos].rect = &rects[pos];
-
 }
 
 int create_projectile(Projectile *projectiles, int index, Direction direction, int speed)
@@ -75,8 +75,6 @@ int create_projectile(Projectile *projectiles, int index, Direction direction, i
     projectiles[index].rect->h = 0;
     projectiles[index].ready = 1;
     projectiles[index].speed = speed;
-
-    
 
     projectiles[index].direction = direction;
     return 0;
@@ -96,9 +94,6 @@ int create_enemy(Enemy *enemies, int index, size_t enemies_size, Projectile *pro
         return 1;
     }
 
-   
-
-    
     enemies[index].rect->x = x;
     enemies[index].rect->y = y;
     enemies[index].rect->h = 48;
@@ -233,7 +228,6 @@ Level init_level1()
     create_platform(&to_return, rects, 2, 250, 400, 100, 100, 0);
     create_platform(&to_return, rects, 3, 30, 350, 50, 100, 0);
     create_platform(&to_return, rects, 4, 500, 290, 80, 100, 0);
-    
 
     to_return.enemies_size = 2;
     to_return.enemies = malloc(to_return.enemies_size * sizeof(Enemy));
@@ -262,12 +256,10 @@ Level init_level1()
         return to_return;
     }
 
-    if(create_enemy(to_return.enemies, 1, to_return.enemies_size, enemy_2_projectiles, 580, 100, amount_proj2))
+    if (create_enemy(to_return.enemies, 1, to_return.enemies_size, enemy_2_projectiles, 580, 100, amount_proj2))
     {
         return to_return;
     }
-
-    
 
     if (check)
     {
@@ -275,6 +267,19 @@ Level init_level1()
     }
 
     to_return.platforms_size = amount_plats;
+
+    to_return.coins_size = 1;
+
+    to_return.coins = malloc(to_return.coins_size);
+
+    to_return.coins[0].collected = 0;
+
+    to_return.coins[0].rect = malloc(sizeof(SDL_Rect));
+
+    to_return.coins->rect->h = 16;
+    to_return.coins->rect->w = 16;
+    to_return.coins->rect->x = 300;
+    to_return.coins->rect->y = 400;
 
     return to_return;
 }

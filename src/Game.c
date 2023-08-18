@@ -1,6 +1,6 @@
 #include "../Headers/Game.h"
 
-void render_player(SDL_Renderer *renderer, Player* player, SDL_Texture** env_texture_map)
+void render_player(SDL_Renderer *renderer, Player *player, SDL_Texture **env_texture_map)
 {
     SDL_RenderCopy(renderer, env_texture_map[player->current_texture], NULL, player->rect);
 }
@@ -33,6 +33,14 @@ void render_level(SDL_Renderer *renderer, Level *level, SDL_Texture **env_textur
             }
         }
     }
+
+    for (size_t i = 0; i < level->coins_size; ++i)
+    {
+        if (!level->coins[i].collected)
+        {
+            SDL_RenderCopy(renderer, env_texture_map[COIN_TEX], NULL, level->coins[i].rect);
+        }
+    }
 }
 
 void render(Game *game, SDL_Texture **env_texture_map)
@@ -54,10 +62,11 @@ int initialize_env_texture_map(SDL_Renderer *renderer, SDL_Texture **env_texture
     env_texture_map[PLAYER_RIGHT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_RIGHT_DOWN_SURF]);
     env_texture_map[PLAYER_LEFT_UP_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_UP_SURF]);
     env_texture_map[PLAYER_LEFT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_DOWN_SURF]);
+    env_texture_map[COIN_SURF] = SDL_CreateTextureFromSurface(renderer, surface_map[COIN_TEX]);
 
-    for(size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
+    for (size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
     {
-        if(!*env_texture_map)
+        if (!*env_texture_map)
         {
             return 1;
         }
@@ -71,11 +80,7 @@ int initialize_player(Player *player, SDL_Rect *player_rect)
     {
         return 1;
     }
-    
 
-    
-
-    
     player->direction = 0;
     player->jump_progress = 0;
     player->dx = 0;
@@ -89,7 +94,6 @@ int initialize_player(Player *player, SDL_Rect *player_rect)
     player->on_ground = 1;
     return 0;
 }
-
 
 int initialize_surface_map(SDL_Surface **surface_map)
 {
@@ -112,6 +116,7 @@ int initialize_surface_map(SDL_Surface **surface_map)
     surface_map[ENEMY_NOT_ATTACK] = IMG_Load("Ressources/Enemy/EnemyNotAttack.png");
     surface_map[ENEMY_ATTACK] = IMG_Load("Ressources/Enemy/EnemyAttack.png");
     surface_map[PROJECTILE] = IMG_Load("Ressources/Enemy/Projectile.png");
+    surface_map[COIN_SURF] = IMG_Load("Ressources/Assets/Coin.png");
 
     // check if every surface is initialized correctly
     for (size_t i = 0; i < SIZE_SURFACE_MAP; ++i)
@@ -232,6 +237,8 @@ int run_game()
             player.rect->x = PLAYER_X_START;
             player.rect->y = PLAYER_Y_START;
         }
+
+        check_coin_collection(&player, &game.gameboard->levels[game.gameboard->current_level]);
         choose_player_texture(&player, &timer_player_up_down);
 
         render(&game, env_texture_map);
