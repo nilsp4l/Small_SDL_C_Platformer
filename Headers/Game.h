@@ -22,12 +22,6 @@ struct game
 
 typedef struct game Game;
 
-
-
-
-
-
-
 /*
     Initialize the technological aspects of the game.
     Namely renderer and window

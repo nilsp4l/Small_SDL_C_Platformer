@@ -37,10 +37,11 @@ struct player
     int direction;
     int on_ground;
     int jump_progress;
+    int timer;
 };
 
 typedef struct player Player;
 
-void choose_player_texture(Player *player, int *timer);
+void choose_player_texture(Player *player);
 
 #endif

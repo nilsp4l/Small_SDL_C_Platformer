@@ -20,7 +20,7 @@ typedef struct gameboard Gameboard;
 
 void tear_down_level(Level *level);
 
-Level init_level1();
+Level init_level1(int* check);
 void move_projectiles(Level *level);
 void check_coin_collection(Player *player, Level *level);
 int check_for_player_dead(Player *player, Level *level);

@@ -80,7 +80,7 @@ int initialize_player(Player *player, SDL_Rect *player_rect)
     {
         return 1;
     }
-
+    player->timer = 0;
     player->direction = 0;
     player->jump_progress = 0;
     player->dx = 0;
@@ -161,6 +161,14 @@ void free_surface_map(SDL_Surface **surface_map)
     }
 }
 
+void free_env_texture_map(SDL_Texture** env_texture_map)
+{
+    for(size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
+    {
+        SDL_DestroyTexture(env_texture_map[i]);
+    }
+}
+
 int run_game()
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
@@ -209,8 +217,8 @@ int run_game()
     Gameboard gameboard = {&player, NULL, 0};
 
     game.gameboard = &gameboard;
-
-    Level levels[1] = {init_level1()};
+    int check = 0;
+    Level levels[1] = {init_level1(&check)};
     gameboard.levels = (Level *)&levels;
     gameboard.current_level = 0;
 
@@ -218,12 +226,12 @@ int run_game()
 
     Controller controller = {0, 0, 0, 0, 0};
 
-    int timer_player_up_down = 0;
+    
 
     // game loop
     while (game.running)
     {
-        ++timer_player_up_down;
+        ++player.timer;
 
         SDL_Event event;
 
@@ -239,7 +247,7 @@ int run_game()
         }
 
         check_coin_collection(&player, &game.gameboard->levels[game.gameboard->current_level]);
-        choose_player_texture(&player, &timer_player_up_down);
+        choose_player_texture(&player);
 
         render(&game, env_texture_map);
         SDL_Delay(1000 / 128);
@@ -247,6 +255,7 @@ int run_game()
 
     tear_down_level(&gameboard.levels[gameboard.current_level]);
     free_surface_map(game.surface_map);
+    free_env_texture_map(env_texture_map);
     SDL_DestroyRenderer(game.renderer);
     SDL_DestroyWindow(game.window);
 
