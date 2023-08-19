@@ -9,20 +9,21 @@
 
 
 
+
 struct gameboard
 {
     Player *player;
-    Level *levels;
-    size_t current_level;
+    Level *current_level;
 };
 
 typedef struct gameboard Gameboard;
 
 void tear_down_level(Level *level);
 
-Level init_level1(int* check);
+int init_level1(Level* check);
 void move_projectiles(Level *level);
 void check_coin_collection(Player *player, Level *level);
 int check_for_player_dead(Player *player, Level *level);
-
+int check_if_player_escaping(Player *player, Level *level);
+int player_escaping(Player* player, Escape* escape);
 #endif

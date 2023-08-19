@@ -38,6 +38,7 @@ struct player
     int on_ground;
     int jump_progress;
     int timer;
+    int escaping;
 };
 
 typedef struct player Player;

@@ -22,3 +22,5 @@ void choose_player_texture(Player *player)
     player->timer = 0;
   }
 }
+
+

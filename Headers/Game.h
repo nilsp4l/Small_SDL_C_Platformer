@@ -10,6 +10,20 @@
 #include "Gameboard.h"
 #include "Control.h"
 
+#define NORMAL_GAMEPLAY_MODE (0)
+#define ESCAPE_MODE (1)
+
+struct game;
+typedef struct game Game;
+
+struct game_mode
+{
+    int (*execute_mode)(Game *);
+};
+
+typedef struct game_mode Game_Mode;
+
+
 
 struct game
 {
@@ -17,10 +31,15 @@ struct game
     SDL_Surface **surface_map;
     SDL_Renderer *renderer;
     Gameboard *gameboard;
+    Controller *controller;
+    SDL_Texture **env_texture_map;
+    Game_Mode *game_modes;
+    int current_mode;
     int running;
 };
 
-typedef struct game Game;
+
+
 
 /*
     Initialize the technological aspects of the game.
@@ -33,11 +52,10 @@ int initialize_surface_map(SDL_Surface **surface_map);
 
 int initialize_player(Player *player, SDL_Rect *player_rect);
 
-void render_player(SDL_Renderer* renderer, Player* player, SDL_Texture** env_texture_map);
+void render_player(SDL_Renderer *renderer, Player *player, SDL_Texture **env_texture_map);
 
-void render_level(SDL_Renderer* renderer, Level* level, SDL_Texture** env_texture_map);
+void render_level(SDL_Renderer *renderer, Level *level, SDL_Texture **env_texture_map);
 
-
-void render(Game* game, SDL_Texture** env_texture_map);
+void render(Game *game, SDL_Texture **env_texture_map);
 
 #endif

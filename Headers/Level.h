@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include "Enemy.h"
 
+struct escape
+{
+    SDL_Rect *rect;
+};
+
+typedef struct escape Escape;
 
 struct coin
 {
@@ -16,12 +22,13 @@ typedef struct coin Coin;
 
 struct level
 {
-    Platform* platforms;
+    Platform *platforms;
     size_t platforms_size;
-    Enemy* enemies;
+    Enemy *enemies;
     size_t enemies_size;
-    Coin* coins;
+    Coin *coins;
     size_t coins_size;
+    Escape *escape;
 };
 
 typedef struct level Level;

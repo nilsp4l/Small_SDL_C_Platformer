@@ -41,12 +41,14 @@ void render_level(SDL_Renderer *renderer, Level *level, SDL_Texture **env_textur
             SDL_RenderCopy(renderer, env_texture_map[COIN_TEX], NULL, level->coins[i].rect);
         }
     }
+
+    SDL_RenderCopy(renderer, env_texture_map[ESCAPE_TEX], NULL, level->escape->rect);
 }
 
 void render(Game *game, SDL_Texture **env_texture_map)
 {
     SDL_RenderClear(game->renderer);
-    render_level(game->renderer, &game->gameboard->levels[game->gameboard->current_level], env_texture_map);
+    render_level(game->renderer, game->gameboard->current_level, env_texture_map);
     render_player(game->renderer, game->gameboard->player, env_texture_map);
 
     SDL_RenderPresent(game->renderer);
@@ -62,7 +64,8 @@ int initialize_env_texture_map(SDL_Renderer *renderer, SDL_Texture **env_texture
     env_texture_map[PLAYER_RIGHT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_RIGHT_DOWN_SURF]);
     env_texture_map[PLAYER_LEFT_UP_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_UP_SURF]);
     env_texture_map[PLAYER_LEFT_DOWN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[PLAYER_LEFT_DOWN_SURF]);
-    env_texture_map[COIN_SURF] = SDL_CreateTextureFromSurface(renderer, surface_map[COIN_TEX]);
+    env_texture_map[COIN_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[COIN_SURF]);
+    env_texture_map[ESCAPE_TEX] = SDL_CreateTextureFromSurface(renderer, surface_map[ESCAPE_SURF]);
 
     for (size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
     {
@@ -92,6 +95,7 @@ int initialize_player(Player *player, SDL_Rect *player_rect)
     player->rect->x = PLAYER_X_START;
     player->rect->y = PLAYER_Y_START;
     player->on_ground = 1;
+    player->escaping = 0;
     return 0;
 }
 
@@ -117,6 +121,7 @@ int initialize_surface_map(SDL_Surface **surface_map)
     surface_map[ENEMY_ATTACK] = IMG_Load("Ressources/Enemy/EnemyAttack.png");
     surface_map[PROJECTILE] = IMG_Load("Ressources/Enemy/Projectile.png");
     surface_map[COIN_SURF] = IMG_Load("Ressources/Assets/Coin.png");
+    surface_map[ESCAPE_SURF] = IMG_Load("Ressources/Assets/Escape.png");
 
     // check if every surface is initialized correctly
     for (size_t i = 0; i < SIZE_SURFACE_MAP; ++i)
@@ -161,12 +166,64 @@ void free_surface_map(SDL_Surface **surface_map)
     }
 }
 
-void free_env_texture_map(SDL_Texture** env_texture_map)
+void free_env_texture_map(SDL_Texture **env_texture_map)
 {
-    for(size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
+    for (size_t i = 0; i < SIZE_ENV_TEXTURE_MAP; ++i)
     {
         SDL_DestroyTexture(env_texture_map[i]);
     }
+}
+
+int escape_mode(Game *game)
+{
+    if (game->gameboard->player->escaping && player_escaping(game->gameboard->player, game->gameboard->current_level->escape))
+    {
+        SDL_Event event;
+        handle_input(&event, game->controller, &game->running);
+        render(game, game->env_texture_map);
+        SDL_Delay(1000 / 128);
+    }
+    else
+    {
+        game->gameboard->player->rect->x = PLAYER_X_START;
+        game->gameboard->player->rect->y = PLAYER_Y_START;
+        game->current_mode = NORMAL_GAMEPLAY_MODE;
+        tear_down_level(game->gameboard->current_level);
+        return init_level1(game->gameboard->current_level);
+    }
+
+    return 0;
+}
+
+int normal_game_play_mode(Game *game)
+{
+    ++game->gameboard->player->timer;
+
+    SDL_Event event;
+
+    handle_input(&event, game->controller, &game->running);
+
+    move_player(game->gameboard->player, game->controller, game->gameboard->current_level);
+    let_enemies_attack(game->gameboard->current_level->enemies, game->gameboard->current_level->enemies_size);
+    move_projectiles(game->gameboard->current_level);
+    if (check_for_player_dead(game->gameboard->player, game->gameboard->current_level))
+    {
+        game->gameboard->player->rect->x = PLAYER_X_START;
+        game->gameboard->player->rect->y = PLAYER_Y_START;
+    }
+
+    check_coin_collection(game->gameboard->player, game->gameboard->current_level);
+    choose_player_texture(game->gameboard->player);
+
+    if (check_if_player_escaping(game->gameboard->player, game->gameboard->current_level))
+    {
+        game->gameboard->player->escaping = 1;
+        game->current_mode = ESCAPE_MODE;
+    }
+
+    render(game, game->env_texture_map);
+    SDL_Delay(1000 / 128);
+    return 0;
 }
 
 int run_game()
@@ -207,6 +264,7 @@ int run_game()
     {
         return 1;
     }
+    game.env_texture_map = (SDL_Texture **)&env_texture_map;
 
     if (initialize_player(&player, &player_rec))
     {
@@ -214,46 +272,34 @@ int run_game()
         return 1;
     }
 
-    Gameboard gameboard = {&player, NULL, 0};
+    Level level;
+    Gameboard gameboard = {&player, &level};
 
     game.gameboard = &gameboard;
-    int check = 0;
-    Level levels[1] = {init_level1(&check)};
-    gameboard.levels = (Level *)&levels;
-    gameboard.current_level = 0;
 
+    if (init_level1(&level))
+    {
+        fprintf(stderr, "Error initializing level\n");
+        return 1;
+    }
     game.running = 1;
 
     Controller controller = {0, 0, 0, 0, 0};
+    Game_Mode game_mode[2] = {{normal_game_play_mode}, {escape_mode}};
 
+    game.game_modes = (Game_Mode *)game_mode;
+
+    game.controller = &controller;
     
+    game.current_mode = NORMAL_GAMEPLAY_MODE;
 
     // game loop
     while (game.running)
     {
-        ++player.timer;
-
-        SDL_Event event;
-
-        handle_input(&event, &controller, &game.running);
-
-        move_player(&player, &controller, &game.gameboard->levels[game.gameboard->current_level]);
-        let_enemies_attack(levels[game.gameboard->current_level].enemies, levels[game.gameboard->current_level].enemies_size);
-        move_projectiles(&game.gameboard->levels[game.gameboard->current_level]);
-        if (check_for_player_dead(&player, &game.gameboard->levels[game.gameboard->current_level]))
-        {
-            player.rect->x = PLAYER_X_START;
-            player.rect->y = PLAYER_Y_START;
-        }
-
-        check_coin_collection(&player, &game.gameboard->levels[game.gameboard->current_level]);
-        choose_player_texture(&player);
-
-        render(&game, env_texture_map);
-        SDL_Delay(1000 / 128);
+        game.game_modes[game.current_mode].execute_mode(&game);
     }
 
-    tear_down_level(&gameboard.levels[gameboard.current_level]);
+    tear_down_level(&level);
     free_surface_map(game.surface_map);
     free_env_texture_map(env_texture_map);
     SDL_DestroyRenderer(game.renderer);
