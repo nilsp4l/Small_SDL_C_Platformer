@@ -1,8 +1,5 @@
 #include "../Headers/Clock.h"
 
-
-
-
 Projectile* use_clock(Projectile_Clock* clock)
 {
     if(!clock)
@@ -19,7 +16,5 @@ Projectile* use_clock(Projectile_Clock* clock)
 
     clock->hand = (clock->hand + 1) % clock->clock_size;
     
-    
-
     return to_return;
 }
