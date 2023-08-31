@@ -128,7 +128,7 @@ int create_projectile(Projectile *projectiles, int index, Direction direction, i
     return 0;
 }
 
-int create_enemy(Enemy *enemies, size_t index, size_t enemies_size, Projectile *projectiles, int x, int y, size_t amount_projectiles)
+int create_enemy(Enemy *enemies, size_t index, size_t enemies_size, Projectile *projectiles, int x, int y, int cooldown, size_t amount_projectiles)
 {
 
     if (index >= enemies_size)
@@ -171,7 +171,7 @@ int create_enemy(Enemy *enemies, size_t index, size_t enemies_size, Projectile *
     *enemies[index].current_projectile = NULL;
 
     enemies[index].timer = 0;
-
+    enemies[index].cooldown = cooldown;
     SDL_Rect *current_proj_rect = NULL;
     for (size_t i = 0; i < enemies[index].projectile_clock->clock_size; ++i)
     {
@@ -269,7 +269,7 @@ Escape *create_escape()
 }
 
 
-int init_level1(Level *level)
+int init_level0(Level *level)
 {
     if (!level)
     {
@@ -324,7 +324,7 @@ int init_level1(Level *level)
         return 1;
     }
 
-    if (create_enemy(level->enemies, 0, level->enemies_size, enemy_1_projectiles, 50, 100, amount_proj1))
+    if (create_enemy(level->enemies, 0, level->enemies_size, enemy_1_projectiles, 50, 100, 20, amount_proj1))
     {
         return 1;
     }
@@ -337,7 +337,255 @@ int init_level1(Level *level)
         return 1;
     }
 
-    if (create_enemy(level->enemies, 1, level->enemies_size, enemy_2_projectiles, 300, 560, amount_proj2))
+    if (create_enemy(level->enemies, 1, level->enemies_size, enemy_2_projectiles, 300, 560, 100, amount_proj2))
+    {
+        return 1;
+    }
+
+    if (check)
+    {
+        puts("Error initializing level 1");
+        return 1;
+    }
+
+    
+
+    level->coins_size = 2;
+
+    level->coins = malloc(level->coins_size * sizeof(Coin));
+
+    create_coin(level->coins, 0, level->coins_size, 300, 400);
+    create_coin(level->coins, 1, level->coins_size, 50, 350);
+
+    level->escape = create_escape();
+
+    if (!level->escape)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int init_level1(Level *level)
+{
+    if (!level)
+    {
+        return 1;
+    }
+
+    clear_level(level);
+
+    int check = 0;
+
+    level->platforms_size = 7;
+    level->platforms = malloc(level->platforms_size * sizeof(Platform));
+
+    if (!level->platforms)
+    {
+        return 1;
+    }
+
+    clear_platforms(level->platforms, level->platforms_size);
+
+    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
+    check |= create_platform(level, 1, 40, 480, 200, H_BASE_PLAT, 0);
+    check |= create_platform(level, 2, 250, 400, 100, H_BASE_PLAT, 0);
+    check |= create_platform(level, 3, 380, 350, 50, H_BASE_PLAT, 0);
+    check |= create_platform(level, 4, 500, 290, 80, H_BASE_PLAT, 0);
+    check |= create_platform(level, 5, 400, 200, 80, H_BASE_PLAT, 0);
+    check |= create_platform(level, 6, 540, 100, 80, H_BASE_PLAT, 0);
+
+    if (check)
+    {
+        return 1;
+    }
+
+    level->enemies_size = 0;
+    
+
+    level->coins_size = 0;
+
+
+    level->escape = create_escape();
+
+    if (!level->escape)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int init_level2(Level *level)
+{
+    if (!level)
+    {
+        return 1;
+    }
+
+    clear_level(level);
+
+    int check = 0;
+
+    level->platforms_size = 7;
+    level->platforms = malloc(level->platforms_size * sizeof(Platform));
+
+    if (!level->platforms)
+    {
+        return 1;
+    }
+
+    clear_platforms(level->platforms, level->platforms_size);
+
+    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
+    check |= create_platform(level, 1, 40, 480, 100, 100, 0);
+    check |= create_platform(level, 2, 250, 400, 100, 100, 0);
+    check |= create_platform(level, 3, 40, 350, 100, 100, 0);
+    check |= create_platform(level, 4, 500, 290, 100, 100, 0);
+    check |= create_platform(level, 5, 500, 200, 100, 100, 0);
+    check |= create_platform(level, 6, 500, 100, 100, 100, 0);
+
+    if (check)
+    {
+        return 1;
+    }
+
+    level->enemies_size = 0;
+    
+
+    level->escape = create_escape();
+
+    if (!level->escape)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int init_level3(Level *level)
+{
+    if (!level)
+    {
+        return 1;
+    }
+
+    clear_level(level);
+
+    int check = 0;
+
+    level->platforms_size = 7;
+    level->platforms = malloc(level->platforms_size * sizeof(Platform));
+
+    if (!level->platforms)
+    {
+        return 1;
+    }
+
+    clear_platforms(level->platforms, level->platforms_size);
+
+    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
+    check |= create_platform(level, 1, 40, 480, 100, 100, 0);
+    check |= create_platform(level, 2, 250, 400, 100, 100, 0);
+    check |= create_platform(level, 3, 40, 350, 100, 100, 0);
+    check |= create_platform(level, 4, 500, 290, 100, 100, 0);
+    check |= create_platform(level, 5, 500, 200, 100, 100, 0);
+    check |= create_platform(level, 6, 500, 100, 100, 100, 0);
+
+    if (check)
+    {
+        return 1;
+    }
+
+    level->enemies_size = 0;
+
+
+    level->coins_size = 2;
+
+    level->coins = malloc(level->coins_size * sizeof(Coin));
+
+    create_coin(level->coins, 0, level->coins_size, 540, 540);
+    create_coin(level->coins, 1, level->coins_size, 50, 350);
+    
+
+    level->escape = create_escape();
+
+    if (!level->escape)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int init_level5(Level *level)
+{
+    if (!level)
+    {
+        return 1;
+    }
+
+    clear_level(level);
+
+    int check = 0;
+
+    level->platforms_size = 9;
+    level->platforms = malloc(level->platforms_size * sizeof(Platform));
+
+    if (!level->platforms)
+    {
+        return 1;
+    }
+
+    clear_platforms(level->platforms, level->platforms_size);
+
+    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
+    check |= create_platform(level, 1, 340, 470, 30, 100, 0);
+    check |= create_platform(level, 2, 290, 390, 40, 100, 0);
+    check |= create_platform(level, 3, 30, 350, 50, 100, 0);
+    check |= create_platform(level, 4, 500, 290, 80, 100, 0);
+    check |= create_platform(level, 5, 400, 200, 80, 100, 0);
+    check |= create_platform(level, 6, 540, 100, 80, 100, 0);
+    check |= create_platform(level, 7, 540, 100, 80, 100, 0);
+    check |= create_platform(level, 8, 540, 100, 80, 100, 0);
+
+    if (check)
+    {
+        return 1;
+    }
+
+    level->enemies_size = 2;
+    level->enemies = malloc(level->enemies_size * sizeof(Enemy));
+    if (!level->enemies)
+    {
+        return 1;
+    }
+    clear_enemies(level->enemies, level->enemies_size);
+    size_t amount_proj1 = 2;
+    Projectile *enemy_1_projectiles = malloc(amount_proj1 * sizeof(Projectile));
+    if (!enemy_1_projectiles)
+    {
+        return 1;
+    }
+
+    check |= create_projectile(enemy_1_projectiles, 0, DOWN, 2);
+    check |= create_projectile(enemy_1_projectiles, 1, BOTTOM_RIGHT, 2);
+    if (check)
+    {
+        return 1;
+    }
+
+    if (create_enemy(level->enemies, 0, level->enemies_size, enemy_1_projectiles, 50, 100, 20, amount_proj1))
+    {
+        return 1;
+    }
+
+    size_t amount_proj2 = 1;
+    Projectile *enemy_2_projectiles = malloc(amount_proj2 * sizeof(Projectile));
+    check |= create_projectile(enemy_2_projectiles, 0, UP, 2);
+    if (check)
+    {
+        return 1;
+    }
+
+    if (create_enemy(level->enemies, 1, level->enemies_size, enemy_2_projectiles, 300, 560, 100, amount_proj2))
     {
         return 1;
     }

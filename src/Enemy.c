@@ -58,16 +58,16 @@ void shoot(Enemy *enemy)
 
     ++enemy->timer;
 
-    if (enemy->timer <= 100)
+    if (enemy->timer <= enemy->cooldown)
     {
         enemy->current_texture = ENEMY_NOT_ATTACK_TEX;
     }
-    else if (enemy->timer > 100 && enemy->timer <= 200)
+    else if (enemy->timer > enemy->cooldown && enemy->timer <= 2 * enemy->cooldown)
     {
         // wiggle the omega
         omega_wiggle(enemy->rect, enemy->timer);
     }
-    else if (enemy->timer > 200)
+    else if (enemy->timer > enemy->cooldown)
     {
         enemy->current_texture = ENEMY_ATTACK_TEX;
 

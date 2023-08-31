@@ -13,6 +13,8 @@ struct enemy
     SDL_Rect *rect;
     Projectile **current_projectile;
     int current_texture;
+    // must be a multiple of 20
+    int cooldown;
     int timer;
 };
 
