@@ -1,5 +1,6 @@
 #include "../Headers/Gameboard.h"
 
+// this function needs to be overworked, because there just some random numbers, which do the trick pretty well but not nearly good enough
 int check_collision(SDL_Rect *rect1, Player *player)
 {
     if (rect1->x + rect1->w - PLAYER_X_OFFSET_RIGHT - 10 >= player->rect->x && rect1->x - PLAYER_X_OFFSET_LEFT <= player->rect->x && rect1->y - rect1->h - 10 <= player->rect->y && rect1->y + rect1->h >= player->rect->y + 10)

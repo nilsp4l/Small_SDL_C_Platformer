@@ -174,8 +174,8 @@ void free_env_texture_map(SDL_Texture **env_texture_map)
     }
 }
 
-int go_to_next_level(Game* game)
-{   
+int go_to_next_level(Game *game)
+{
     game->current_level_number = (game->current_level_number + 1) % game->max_level;
     return game->level_inits[game->current_level_number].fn(game->gameboard->current_level);
 }
@@ -249,6 +249,7 @@ int run_game()
     {
         fprintf(stderr, "Error initializing surface map\n");
         free_surface_map(surface_map);
+        SDL_Quit();
         return 1;
     }
 
@@ -271,6 +272,11 @@ int run_game()
 
     if (initialize_env_texture_map(game.renderer, env_texture_map, surface_map))
     {
+        free_surface_map(game.surface_map);
+        free_env_texture_map(env_texture_map);
+        SDL_DestroyRenderer(game.renderer);
+        SDL_DestroyWindow(game.window);
+        SDL_Quit();
         return 1;
     }
     game.env_texture_map = (SDL_Texture **)&env_texture_map;
@@ -278,6 +284,11 @@ int run_game()
     if (initialize_player(&player, &player_rec))
     {
         fprintf(stderr, "Error initializing player\n");
+        free_surface_map(game.surface_map);
+        free_env_texture_map(env_texture_map);
+        SDL_DestroyRenderer(game.renderer);
+        SDL_DestroyWindow(game.window);
+        SDL_Quit();
         return 1;
     }
 
@@ -290,6 +301,12 @@ int run_game()
     {
         fprintf(stderr, "Error initializing level\n");
         tear_down_level(game.gameboard->current_level);
+        tear_down_level(&level);
+        free_surface_map(game.surface_map);
+        free_env_texture_map(env_texture_map);
+        SDL_DestroyRenderer(game.renderer);
+        SDL_DestroyWindow(game.window);
+        SDL_Quit();
         return 1;
     }
     game.running = 1;

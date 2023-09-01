@@ -22,7 +22,7 @@ void move_player(Player *player, Controller *controller, Level *level)
     {
         player->direction = 1;
         player->dx = -SPEED;
-        if(player->rect->x <= WINDOW_X_OFFSET_TO_DISAPPEAR)
+        if (player->rect->x <= WINDOW_X_OFFSET_TO_DISAPPEAR)
         {
             player->rect->x = WINDOW_X_MAX;
         }
@@ -31,7 +31,7 @@ void move_player(Player *player, Controller *controller, Level *level)
     {
         player->direction = 0;
         player->dx = SPEED;
-        if(player->rect->x >= WINDOW_X_MAX)
+        if (player->rect->x >= WINDOW_X_MAX)
         {
             player->rect->x = WINDOW_X_OFFSET_TO_DISAPPEAR;
         }
@@ -95,21 +95,20 @@ void do_gravity(Player *player, Platform *platform_player_is_on)
 
 int jump(Player *player)
 {
-        if(player->jump_progress < PLAYER_MAX_JUMP_HEIGHT)
-        {
-            // SPEED * 2 upwards
-            player->dy = -(SPEED << 1);
-            ++player->jump_progress;
-            return 0;
-        }
-        else if(player->jump_progress < PLAYER_MAX_JUMP_HEIGHT + PLAYER_FLOATING_TIME)
-        {
-            ++player->jump_progress;
-            return 0;
-        }
-        else
-        {
-            return 1;
-        }
-        
+    if (player->jump_progress < PLAYER_MAX_JUMP_HEIGHT)
+    {
+        // SPEED * 2 upwards
+        player->dy = -(SPEED << 1);
+        ++player->jump_progress;
+        return 0;
+    }
+    else if (player->jump_progress < PLAYER_MAX_JUMP_HEIGHT + PLAYER_FLOATING_TIME)
+    {
+        ++player->jump_progress;
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
