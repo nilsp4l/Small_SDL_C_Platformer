@@ -23,12 +23,8 @@ struct game_mode
 
 typedef struct game_mode Game_Mode;
 
-struct level_init
-{
-    int (*fn)(Level*);
-};
 
-typedef struct level_init Level_Init;
+
 
 struct game
 {
@@ -39,7 +35,6 @@ struct game
     Controller *controller;
     SDL_Texture **env_texture_map;
     Game_Mode *game_modes;
-    Level_Init* level_inits;
     size_t max_level;
     size_t current_level_number;
     int current_mode;

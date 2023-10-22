@@ -176,8 +176,12 @@ void free_env_texture_map(SDL_Texture **env_texture_map)
 
 int go_to_next_level(Game *game)
 {
-    game->current_level_number = (game->current_level_number + 1) % game->max_level;
-    return game->level_inits[game->current_level_number].fn(game->gameboard->current_level);
+    game->current_level_number = (game->current_level_number + 1) % (game->max_level + 1);
+    if(game->current_level_number == 0)
+    {
+        game->current_level_number = 1;
+    }
+    return init_level(game->gameboard->current_level, game->current_level_number);
 }
 
 int escape_mode(Game *game)
@@ -216,9 +220,9 @@ int normal_game_play_mode(Game *game)
     {
         game->gameboard->player->rect->x = PLAYER_X_START;
         game->gameboard->player->rect->y = PLAYER_Y_START;
-        game->current_level_number = 0;
+        game->current_level_number = 1;
         tear_down_level(game->gameboard->current_level);
-        return game->level_inits[game->current_level_number].fn(game->gameboard->current_level);
+        return init_level(game->gameboard->current_level, game->current_level_number);
     }
 
     check_coin_collection(game->gameboard->player, game->gameboard->current_level);
@@ -297,11 +301,10 @@ int run_game()
 
     game.gameboard = &gameboard;
 
-    if (init_level5(&level))
+    if (init_level(&level, 1))
     {
         fprintf(stderr, "Error initializing level\n");
         tear_down_level(game.gameboard->current_level);
-        tear_down_level(&level);
         free_surface_map(game.surface_map);
         free_env_texture_map(env_texture_map);
         SDL_DestroyRenderer(game.renderer);
@@ -320,17 +323,17 @@ int run_game()
 
     game.current_mode = NORMAL_GAMEPLAY_MODE;
 
-    game.current_level_number = 0;
-    game.max_level = 5;
-    Level_Init level_inits[] = {{init_level1}, {init_level2}, {init_level3}, {init_level0}, {init_level5}};
+    game.current_level_number = 1;
+    game.max_level = 4;
 
-    game.level_inits = level_inits;
+    
+
+    
+
+    
 
     // game loop
-    while (game.running)
-    {
-        game.game_modes[game.current_mode].execute_mode(&game);
-    }
+    while (game.running && !game.game_modes[game.current_mode].execute_mode(&game));
 
     tear_down_level(&level);
     free_surface_map(game.surface_map);

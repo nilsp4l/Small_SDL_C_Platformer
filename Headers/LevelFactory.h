@@ -1,4 +1,5 @@
 #include "Gameboard.h"
+#include "Utility.h"
 
 #define X_BASE_PLAT (-40)
 #define Y_BASE_PLAT (587)
@@ -7,8 +8,5 @@
 
 void tear_down_level(Level *level);
 
-int init_level0(Level *level);
-int init_level1(Level *level);
-int init_level2(Level *level);
-int init_level3(Level *level);
-int init_level5(Level *level);
+
+int init_level(Level* level, int level_num);

@@ -9,7 +9,10 @@ void free_platforms(Level *level)
 
     for (size_t i = 0; i < level->platforms_size; ++i)
     {
-        free(level->platforms[i].rect);
+        if(level->platforms[i].rect)
+        {
+            free(level->platforms[i].rect);
+        }
     }
 
     free(level->platforms);
@@ -94,7 +97,7 @@ void tear_down_level(Level *level)
 
 int create_platform(Level *level, int pos, int x, int y, int w, int h, int is_base)
 {
-    level->platforms[pos].rect = malloc(sizeof(Platform));
+    level->platforms[pos].rect = malloc(sizeof(SDL_Rect));
     if (!level->platforms[pos].rect)
     {
         return 1;
@@ -268,144 +271,361 @@ Escape *create_escape()
     return to_return;
 }
 
-
-int init_level0(Level *level)
+void print_parse_error(char current)
 {
-    if (!level)
+    fprintf(stderr, "Did not expect char %c in level file\n", current);
+}
+
+int parse_number(char* buffer, size_t buffer_size, char seperator, FILE* level_file)
+{
+    zero_array(buffer, buffer_size);
+    char current = 0;
+    for(size_t i = 0; i < buffer_size && current != EOF && current != seperator; ++i)
     {
+        current = fgetc(level_file);
+        *(buffer + i) = current;
+    }
+
+    return atoi(buffer);
+}
+
+void parse_coord_line(char* buffer, size_t buffer_size, int* coord_buffer, size_t coord_buffer_size, FILE* level_file)
+{
+    for(size_t i = 0; i < coord_buffer_size - 1; ++i)
+    {
+        *(coord_buffer + i) = 0;
+        *(coord_buffer + i) = parse_number(buffer, buffer_size, ' ', level_file);
+    }
+
+    *(coord_buffer + coord_buffer_size - 1) = parse_number(buffer, buffer_size, '\n', level_file);
+    
+    
+}
+
+int parse_amount(FILE* level_file, char* buffer, size_t buffer_size, int *amount)
+{
+    char current = 0;
+    
+    
+    zero_array(buffer, buffer_size);
+    
+    if(fgetc(level_file) != '\n' || fgetc(level_file) != '#')
+    {
+        print_parse_error(current);
+        return 1;
+    }
+    int val = parse_number(buffer, buffer_size, '\n', level_file);
+    
+
+    if(val < 0 || val > 40)
+    {
+        fprintf(stderr, "Invalid amount\n");
         return 1;
     }
 
-    clear_level(level);
+    *amount = val;
+    
+    return 0; 
+}
 
-    int check = 0;
+int parse_platforms(FILE* level_file, Level* level, char* buffer, size_t buffer_size)
+{
+    
 
-    level->platforms_size = 7;
+    int amount;
+
+    parse_amount(level_file, buffer, buffer_size, &amount);
+
+    level->platforms_size = amount + 1;
+    
+
     level->platforms = malloc(level->platforms_size * sizeof(Platform));
 
     if (!level->platforms)
     {
         return 1;
     }
-
     clear_platforms(level->platforms, level->platforms_size);
 
-    check |= create_platform(level, 0, -40, 587, 720, 100, 1);
-    check |= create_platform(level, 1, 40, 480, 200, 100, 0);
-    check |= create_platform(level, 2, 250, 400, 100, 100, 0);
-    check |= create_platform(level, 3, 30, 350, 50, 100, 0);
-    check |= create_platform(level, 4, 500, 290, 80, 100, 0);
-    check |= create_platform(level, 5, 400, 200, 80, 100, 0);
-    check |= create_platform(level, 6, 540, 100, 80, 100, 0);
+    create_platform(level, 0, -40, 587, 720, 100, 1);
 
-    if (check)
+
+    int coord_buffer[4] = {0, 0, 0, 0};
+    
+    size_t counter = 1;
+
+    for(; counter < level->platforms_size; ++counter)
+    {
+        parse_coord_line(buffer, buffer_size, (int*) coord_buffer, 4, level_file);
+        if(create_platform(level, counter, coord_buffer[0], coord_buffer[1], coord_buffer[2], coord_buffer[3], 0))
+        {
+            return 1;
+        }  
+    }
+
+    if(counter != level->platforms_size)
     {
         return 1;
     }
 
-    level->enemies_size = 2;
+    if(fgetc(level_file) != ';' || fgetc(level_file) != '\n')
+    {
+        return 1;
+    }
+
+
+    return 0;
+    
+}
+
+void parse_projectile_line(FILE* level_file, char* buffer, size_t buffer_size, Projectile* projectile, int index)
+{
+    zero_array(buffer, buffer_size);
+    char current = 0;
+
+    for(size_t i = 0; i < buffer_size && (current = fgetc(level_file)) != EOF && current != ' '; ++i)
+    {
+        buffer[i] = current;
+    }
+    
+    Direction direction = DOWN;
+
+    int dir = buffer[0] + buffer[1];
+
+    switch(dir)
+    {
+        case 'B' : 
+            direction = DOWN;
+            break;
+        case 'U' : 
+            direction = UP;
+            break;
+        case 'L' : 
+            direction = LEFT;
+            break;
+        case 'R' :
+            direction = RIGHT;
+            break;
+        case 'U' + 'L' :
+            direction = UP_LEFT;
+            break;
+        case 'U' + 'R' :
+            direction = UP_RIGHT;
+            break;
+        case 'B' + 'L' :
+            direction = BOTTOM_LEFT;
+            break;
+        case 'B' + 'R' :
+            direction = BOTTOM_RIGHT;
+            break;
+        default:
+            direction = DOWN;
+            break;
+    }
+    
+
+    zero_array(buffer, buffer_size);
+    for(size_t i = 0; (current = fgetc(level_file)) != '\n'; ++i)
+    {
+        buffer[i] = current;
+    }
+
+    int speed = atoi(buffer);
+
+    create_projectile(projectile, index, direction, speed);
+
+}
+
+int parse_projectiles(FILE* level_file, char* buffer, size_t buffer_size, Projectile** projectile_pointer, size_t* amount)
+{
+    zero_array(buffer, buffer_size);
+    int val = 0;
+    if(parse_amount(level_file, buffer, buffer_size, &val))
+    {
+        return 1;
+    }
+
+    *amount = val;
+
+    *projectile_pointer = malloc(val * sizeof(Projectile));
+
+    if(!*projectile_pointer)
+    {
+        return 1;
+    }
+
+    size_t counter = 0; 
+
+    for(; counter < *amount; ++counter)
+    {
+        parse_projectile_line(level_file, buffer, buffer_size, *projectile_pointer, counter);
+    }
+
+    if(fgetc(level_file) != ';')
+    {
+        return 1;
+    }
+    if(counter != *amount)
+    {
+        return 1;
+    }
+
+    
+
+    if(fgetc(level_file) != '\n')
+    {
+        return 1;
+    }
+
+    return 0;
+
+}
+
+int parse_enemies(FILE* level_file, Level* level, char* buffer, size_t buffer_size)
+{
+    zero_array(buffer, buffer_size);
+    int amount;
+    if(parse_amount(level_file, buffer, buffer_size, &amount))
+    {
+        return 1;
+    }
+
+    level->enemies_size = amount;
     level->enemies = malloc(level->enemies_size * sizeof(Enemy));
     if (!level->enemies)
     {
         return 1;
     }
     clear_enemies(level->enemies, level->enemies_size);
-    size_t amount_proj1 = 2;
-    Projectile *enemy_1_projectiles = malloc(amount_proj1 * sizeof(Projectile));
-    if (!enemy_1_projectiles)
+
+    size_t counter = 0;
+
+    int coord_buffer[3] = {0, 0, 0};
+    char current_char = 0;
+
+    for(; counter < level->enemies_size; ++counter)
     {
-        return 1;
+        parse_coord_line(buffer, buffer_size, coord_buffer, 3, level_file);
+        
+        if((current_char = fgetc(level_file)) != 'J')
+        {
+            return 1;
+        }
+
+        Projectile* current = NULL;
+        size_t proj_amount = 0;
+        if(parse_projectiles(level_file, buffer, buffer_size, &current, &proj_amount))
+        {
+            return 1;
+        }
+        
+        create_enemy(level->enemies, counter, level->enemies_size, current, coord_buffer[0], coord_buffer[1], coord_buffer[2], proj_amount);
+
+        
     }
 
-    check |= create_projectile(enemy_1_projectiles, 0, DOWN, 2);
-    check |= create_projectile(enemy_1_projectiles, 1, BOTTOM_RIGHT, 2);
-    if (check)
+    if(counter != level->enemies_size)
     {
-        return 1;
-    }
-
-    if (create_enemy(level->enemies, 0, level->enemies_size, enemy_1_projectiles, 50, 100, 20, amount_proj1))
-    {
-        return 1;
-    }
-
-    size_t amount_proj2 = 1;
-    Projectile *enemy_2_projectiles = malloc(amount_proj2 * sizeof(Projectile));
-    check |= create_projectile(enemy_2_projectiles, 0, UP, 2);
-    if (check)
-    {
-        return 1;
-    }
-
-    if (create_enemy(level->enemies, 1, level->enemies_size, enemy_2_projectiles, 300, 560, 100, amount_proj2))
-    {
-        return 1;
-    }
-
-    if (check)
-    {
-        puts("Error initializing level 1");
         return 1;
     }
 
     
+    if(fgetc(level_file) != ';' || !((current_char = fgetc(level_file)) == '\n' || current_char == EOF))
+    {
+        return 1;
+    }
 
-    level->coins_size = 2;
+    return 0;
+}
 
+
+int parse_coins(FILE* level_file, Level* level, char* buffer, size_t buffer_size)
+{
+    zero_array(buffer, buffer_size);
+    int amount;
+    if(parse_amount(level_file, buffer, buffer_size, &amount))
+    {
+        return 1;
+    }
+
+    level->coins_size = amount;
     level->coins = malloc(level->coins_size * sizeof(Coin));
-
-    create_coin(level->coins, 0, level->coins_size, 300, 400);
-    create_coin(level->coins, 1, level->coins_size, 50, 350);
-
-    level->escape = create_escape();
-
-    if (!level->escape)
+    if (!level->coins)
     {
         return 1;
     }
+
+    int coord_buffer[2] = {0, 0};
+    
+    size_t counter = 0;
+
+    for(; counter < level->coins_size; ++counter)
+    {
+        parse_coord_line(buffer, buffer_size, (int*) coord_buffer, 2, level_file);
+        if(create_coin(level->coins, counter, level->coins_size, coord_buffer[0], coord_buffer[1]))
+        {
+            return 1;
+        }  
+    }
+
+    if(counter != level->coins_size)
+    {
+        return 1;
+    }
+
+    if(fgetc(level_file) != ';' || fgetc(level_file) != '\n')
+    {
+        return 1;
+    }
+
     return 0;
+    
 }
 
-int init_level1(Level *level)
+int init_level_from_file(char* file_name, Level* level)
 {
-    if (!level)
-    {
-        return 1;
-    }
-
     clear_level(level);
 
-    int check = 0;
-
-    level->platforms_size = 7;
-    level->platforms = malloc(level->platforms_size * sizeof(Platform));
-
-    if (!level->platforms)
+    FILE* level_file = fopen(file_name, "r");
+    if(!level_file)
     {
+        fprintf(stderr, "Error opening level_file\n");
         return 1;
     }
 
-    clear_platforms(level->platforms, level->platforms_size);
+    size_t buffer_size = 100;
+    char buffer[buffer_size];
+    zero_array(buffer, buffer_size);
 
-    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
-    check |= create_platform(level, 1, 40, 480, 200, H_BASE_PLAT, 0);
-    check |= create_platform(level, 2, 250, 400, 100, H_BASE_PLAT, 0);
-    check |= create_platform(level, 3, 380, 350, 50, H_BASE_PLAT, 0);
-    check |= create_platform(level, 4, 500, 290, 80, H_BASE_PLAT, 0);
-    check |= create_platform(level, 5, 400, 200, 80, H_BASE_PLAT, 0);
-    check |= create_platform(level, 6, 540, 100, 80, H_BASE_PLAT, 0);
-
-    if (check)
+    char current = 0;
+    int platform_flag = 0;
+    while(current != EOF)
     {
-        return 1;
+        current = fgetc(level_file);
+        switch(current)
+        {
+            case 'P': if(parse_platforms(level_file, level, buffer, buffer_size) || platform_flag)
+            {
+                fclose(level_file);
+                return 1;
+            }; platform_flag = 1; break;
+            case 'E': if(parse_enemies(level_file, level, buffer, buffer_size))
+            {
+                fclose(level_file);
+                return 1;
+            };
+            break;
+            case 'C': if(parse_coins(level_file, level, buffer, buffer_size))
+            {
+                fclose(level_file);
+                return 1;
+            };
+            break;
+            default: break;
+        }   
     }
 
-    level->enemies_size = 0;
-    
-
-    level->coins_size = 0;
-
-
+    fclose(level_file);
     level->escape = create_escape();
 
     if (!level->escape)
@@ -415,201 +635,10 @@ int init_level1(Level *level)
     return 0;
 }
 
-int init_level2(Level *level)
+int init_level(Level* level, int level_num)
 {
-    if (!level)
-    {
-        return 1;
-    }
-
-    clear_level(level);
-
-    int check = 0;
-
-    level->platforms_size = 7;
-    level->platforms = malloc(level->platforms_size * sizeof(Platform));
-
-    if (!level->platforms)
-    {
-        return 1;
-    }
-
-    clear_platforms(level->platforms, level->platforms_size);
-
-    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
-    check |= create_platform(level, 1, 40, 480, 100, 100, 0);
-    check |= create_platform(level, 2, 250, 400, 100, 100, 0);
-    check |= create_platform(level, 3, 40, 350, 100, 100, 0);
-    check |= create_platform(level, 4, 500, 290, 100, 100, 0);
-    check |= create_platform(level, 5, 500, 200, 100, 100, 0);
-    check |= create_platform(level, 6, 500, 100, 100, 100, 0);
-
-    if (check)
-    {
-        return 1;
-    }
-
-    level->enemies_size = 0;
-    
-
-    level->escape = create_escape();
-
-    if (!level->escape)
-    {
-        return 1;
-    }
-    return 0;
+    char buf[100] = {0};
+    sprintf(buf, "Levels/%d.lvl", level_num);
+    return init_level_from_file(buf, level);  
 }
 
-int init_level3(Level *level)
-{
-    if (!level)
-    {
-        return 1;
-    }
-
-    clear_level(level);
-
-    int check = 0;
-
-    level->platforms_size = 7;
-    level->platforms = malloc(level->platforms_size * sizeof(Platform));
-
-    if (!level->platforms)
-    {
-        return 1;
-    }
-
-    clear_platforms(level->platforms, level->platforms_size);
-
-    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
-    check |= create_platform(level, 1, 40, 480, 100, 100, 0);
-    check |= create_platform(level, 2, 250, 400, 100, 100, 0);
-    check |= create_platform(level, 3, 40, 350, 100, 100, 0);
-    check |= create_platform(level, 4, 500, 290, 100, 100, 0);
-    check |= create_platform(level, 5, 500, 200, 100, 100, 0);
-    check |= create_platform(level, 6, 500, 100, 100, 100, 0);
-
-    if (check)
-    {
-        return 1;
-    }
-
-    level->enemies_size = 0;
-
-
-    level->coins_size = 2;
-
-    level->coins = malloc(level->coins_size * sizeof(Coin));
-
-    create_coin(level->coins, 0, level->coins_size, 540, 540);
-    create_coin(level->coins, 1, level->coins_size, 50, 350);
-    
-
-    level->escape = create_escape();
-
-    if (!level->escape)
-    {
-        return 1;
-    }
-    return 0;
-}
-
-int init_level5(Level *level)
-{
-    if (!level)
-    {
-        return 1;
-    }
-
-    clear_level(level);
-
-    int check = 0;
-
-    level->platforms_size = 9;
-    level->platforms = malloc(level->platforms_size * sizeof(Platform));
-
-    if (!level->platforms)
-    {
-        return 1;
-    }
-
-    clear_platforms(level->platforms, level->platforms_size);
-
-    check |= create_platform(level, 0, X_BASE_PLAT, Y_BASE_PLAT, W_BASE_PLAT, H_BASE_PLAT, 1);
-    check |= create_platform(level, 1, 340, 470, 30, 100, 0);
-    check |= create_platform(level, 2, 290, 390, 40, 100, 0);
-    check |= create_platform(level, 3, 30, 350, 50, 100, 0);
-    check |= create_platform(level, 4, 500, 290, 80, 100, 0);
-    check |= create_platform(level, 5, 400, 200, 80, 100, 0);
-    check |= create_platform(level, 6, 540, 100, 80, 100, 0);
-    check |= create_platform(level, 7, 540, 100, 80, 100, 0);
-    check |= create_platform(level, 8, 540, 100, 80, 100, 0);
-
-    if (check)
-    {
-        return 1;
-    }
-
-    level->enemies_size = 2;
-    level->enemies = malloc(level->enemies_size * sizeof(Enemy));
-    if (!level->enemies)
-    {
-        return 1;
-    }
-    clear_enemies(level->enemies, level->enemies_size);
-    size_t amount_proj1 = 2;
-    Projectile *enemy_1_projectiles = malloc(amount_proj1 * sizeof(Projectile));
-    if (!enemy_1_projectiles)
-    {
-        return 1;
-    }
-
-    check |= create_projectile(enemy_1_projectiles, 0, DOWN, 2);
-    check |= create_projectile(enemy_1_projectiles, 1, BOTTOM_RIGHT, 2);
-    if (check)
-    {
-        return 1;
-    }
-
-    if (create_enemy(level->enemies, 0, level->enemies_size, enemy_1_projectiles, 50, 100, 20, amount_proj1))
-    {
-        return 1;
-    }
-
-    size_t amount_proj2 = 1;
-    Projectile *enemy_2_projectiles = malloc(amount_proj2 * sizeof(Projectile));
-    check |= create_projectile(enemy_2_projectiles, 0, UP, 2);
-    if (check)
-    {
-        return 1;
-    }
-
-    if (create_enemy(level->enemies, 1, level->enemies_size, enemy_2_projectiles, 300, 560, 100, amount_proj2))
-    {
-        return 1;
-    }
-
-    if (check)
-    {
-        puts("Error initializing level 1");
-        return 1;
-    }
-
-    
-
-    level->coins_size = 2;
-
-    level->coins = malloc(level->coins_size * sizeof(Coin));
-
-    create_coin(level->coins, 0, level->coins_size, 300, 400);
-    create_coin(level->coins, 1, level->coins_size, 50, 350);
-
-    level->escape = create_escape();
-
-    if (!level->escape)
-    {
-        return 1;
-    }
-    return 0;
-}

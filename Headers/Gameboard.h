@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+#define COLLISION_OFFSET 10
+
 
 struct gameboard
 {
