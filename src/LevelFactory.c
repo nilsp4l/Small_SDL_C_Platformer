@@ -599,6 +599,8 @@ int init_level_from_file(char* file_name, Level* level)
 
     char current = 0;
     int platform_flag = 0;
+    int enemy_flag = 0;
+    int coin_flag = 0;
     while(current != EOF)
     {
         current = fgetc(level_file);
@@ -609,17 +611,17 @@ int init_level_from_file(char* file_name, Level* level)
                 fclose(level_file);
                 return 1;
             }; platform_flag = 1; break;
-            case 'E': if(parse_enemies(level_file, level, buffer, buffer_size))
+            case 'E': if(parse_enemies(level_file, level, buffer, buffer_size) || enemy_flag)
             {
                 fclose(level_file);
                 return 1;
-            };
+            }; enemy_flag = 1;
             break;
-            case 'C': if(parse_coins(level_file, level, buffer, buffer_size))
+            case 'C': if(parse_coins(level_file, level, buffer, buffer_size) || coin_flag)
             {
                 fclose(level_file);
                 return 1;
-            };
+            }; coin_flag = 1;
             break;
             default: break;
         }   
