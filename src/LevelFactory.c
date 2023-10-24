@@ -91,6 +91,7 @@ void tear_down_level(Level *level)
 
     free_enemies(level);
 
+    free(level->escape->rect);
     free(level->escape);
 }
 
