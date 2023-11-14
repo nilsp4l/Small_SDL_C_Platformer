@@ -220,7 +220,7 @@ int normal_game_play_mode(Game *game)
     {
         game->gameboard->player->rect->x = PLAYER_X_START;
         game->gameboard->player->rect->y = PLAYER_Y_START;
-        game->current_level_number = 1;
+        game->current_level_number = START_LEVEL;
         tear_down_level(game->gameboard->current_level);
         return init_level(game->gameboard->current_level, game->current_level_number);
     }
@@ -301,7 +301,7 @@ int run_game()
 
     game.gameboard = &gameboard;
 
-    if (init_level(&level, 1))
+    if (init_level(&level, START_LEVEL))
     {
         fprintf(stderr, "Error initializing level\n");
         tear_down_level(game.gameboard->current_level);
@@ -323,8 +323,8 @@ int run_game()
 
     game.current_mode = NORMAL_GAMEPLAY_MODE;
 
-    game.current_level_number = 1;
-    game.max_level = 4;
+    game.current_level_number = START_LEVEL;
+    game.max_level = MAX_LEVEL;
 
     
 

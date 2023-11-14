@@ -13,8 +13,13 @@ Projectile* use_clock(Projectile_Clock* clock)
     {
         return NULL;
     }
-
-    clock->hand = (clock->hand + 1) % clock->clock_size;
+    
+    //there are enemies which have no projectiles but still use the clock for simplicity
+    if(clock->clock_size > 0)
+    {
+        clock->hand = (clock->hand + 1) % clock->clock_size;
+    }
+    
     
     return to_return;
 }
