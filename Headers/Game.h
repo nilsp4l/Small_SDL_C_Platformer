@@ -14,7 +14,7 @@
 #define ESCAPE_MODE (1)
 
 #define START_LEVEL (1)
-#define MAX_LEVEL (5)
+#define MAX_LEVEL (6)
 
 struct game;
 typedef struct game Game;
