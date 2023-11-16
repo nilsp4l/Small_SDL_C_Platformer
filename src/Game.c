@@ -220,7 +220,7 @@ int normal_game_play_mode(Game *game)
     {
         game->gameboard->player->rect->x = PLAYER_X_START;
         game->gameboard->player->rect->y = PLAYER_Y_START;
-        game->current_level_number = START_LEVEL;
+        game->current_level_number = game->current_level_number > DIE_LEVEL_OFFSET ? game->current_level_number - DIE_LEVEL_OFFSET : START_LEVEL;
         tear_down_level(game->gameboard->current_level);
         return init_level(game->gameboard->current_level, game->current_level_number);
     }

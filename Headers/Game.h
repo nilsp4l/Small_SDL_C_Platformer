@@ -14,6 +14,7 @@
 #define ESCAPE_MODE (1)
 
 #define START_LEVEL (1)
+#define DIE_LEVEL_OFFSET (2)
 #define MAX_LEVEL (6)
 
 struct game;
