@@ -191,7 +191,7 @@ int escape_mode(Game *game)
         SDL_Event event;
         handle_input(&event, game->controller, &game->running);
         render(game, game->env_texture_map);
-        SDL_Delay(1000 / 128);
+        SDL_Delay(1000 / 60);
     }
     else
     {
@@ -235,7 +235,7 @@ int normal_game_play_mode(Game *game)
     }
 
     render(game, game->env_texture_map);
-    SDL_Delay(1000 / 128);
+    SDL_Delay(1000 / 60);
     return 0;
 }
 
